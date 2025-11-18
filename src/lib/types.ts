@@ -6,7 +6,7 @@ export type ThreatEvent = {
   riskScore: number;
   details: string;
   status: 'Detected' | 'Investigating' | 'Mitigated' | 'Resolved';
-  agent: 'Phishing & Malware' | 'Network Anomaly' | 'Incident Response' | 'Fraud Detection';
+  agent: 'Phishing & Malware' | 'Network Anomaly' | 'Fraud Detection';
 };
 
 export type User = {
