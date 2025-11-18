@@ -1,0 +1,70 @@
+import type {ThreatEvent, User} from './types';
+
+export const mockUser: User = {
+  id: 'user-1',
+  name: 'Admin',
+  email: 'admin@cybermind.dev',
+};
+
+export const mockThreats: ThreatEvent[] = [
+  {
+    id: 'threat-1',
+    timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+    threatType: 'Phishing',
+    source: 'john.doe@example.com',
+    riskScore: 92,
+    details: 'Urgent! Verify your bank account or your service will be suspended. Click: http://fake-bank-login.com/secure',
+    status: 'Mitigated',
+    agent: 'Phishing & Malware',
+  },
+  {
+    id: 'threat-2',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+    threatType: 'Intrusion',
+    source: '45.88.23.1',
+    riskScore: 85,
+    details: 'Unusual port scanning detected from source IP.',
+    status: 'Mitigated',
+    agent: 'Network Anomaly',
+  },
+  {
+    id: 'threat-3',
+    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    threatType: 'Fraud',
+    source: 'user-1058',
+    riskScore: 78,
+    details: 'Login from unusual country (Russia) & device (Unknown) at 3 AM.',
+    status: 'Mitigated',
+    agent: 'Fraud Detection',
+  },
+  {
+    id: 'threat-4',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    threatType: 'Malware',
+    source: 'invoice.zip',
+    riskScore: 99,
+    details: 'Malicious payload detected in file attachment.',
+    status: 'Investigating',
+    agent: 'Phishing & Malware',
+  },
+  {
+    id: 'threat-5',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    threatType: 'Intrusion',
+    source: '192.168.1.20',
+    riskScore: 75,
+    details: '150 login requests in 30 seconds.',
+    status: 'Resolved',
+    agent: 'Network Anomaly',
+  },
+  {
+    id: 'threat-6',
+    timestamp: new Date(Date.now() - 1000 * 60 * 62).toISOString(),
+    threatType: 'Phishing',
+    source: 'support@legit-service.net',
+    riskScore: 65,
+    details: 'Suspicious link detected in email body.',
+    status: 'Detected',
+    agent: 'Phishing & Malware',
+  },
+];
