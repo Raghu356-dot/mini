@@ -6,7 +6,6 @@ import {Bell, Search} from 'lucide-react';
 import {Input} from '@/components/ui/input';
 
 const pageTitles: {[key: string]: string} = {
-  '/dashboard': 'Dashboard',
   '/analysis': 'Threat Analysis',
   '/settings': 'Settings',
 };
