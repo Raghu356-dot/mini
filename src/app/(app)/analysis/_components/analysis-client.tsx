@@ -15,6 +15,7 @@ import {analyzeFile} from '@/ai/flows/analyze-file';
 import {detectFraud} from '@/ai/flows/detect-fraud';
 import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
+import {correlateEvents} from '@/ai/flows/correlate-events';
 import {Loader2, Sparkles} from 'lucide-react';
 import {cn} from '@/lib/utils';
 
@@ -40,6 +41,10 @@ const networkSchema = z.object({
 
 const fraudSchema = z.object({
   activityDetails: z.string().min(10, 'Please enter activity details.'),
+});
+
+const correlationSchema = z.object({
+  events: z.string().min(20, 'Please enter at least two events to correlate.'),
 });
 
 type AnalysisResult = {
@@ -94,6 +99,14 @@ export function AnalysisClient() {
     resolver: zodResolver(fraudSchema),
     defaultValues: {
       activityDetails: 'User 1058 logged in from Russia with an unknown device at 3 AM.',
+    },
+  });
+
+  const correlationForm = useForm<z.infer<typeof correlationSchema>>({
+    resolver: zodResolver(correlationSchema),
+    defaultValues: {
+      events:
+        'Event 1: Phishing email detected from john.doe@example.com.\nEvent 2: Unusual port scanning from IP 45.88.23.1, which was a link in the email.',
     },
   });
 
@@ -260,6 +273,39 @@ export function AnalysisClient() {
     setLoading(false);
   };
 
+  const handleCorrelationSubmit = async (values: z.infer<typeof correlationSchema>) => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const response = await correlateEvents({events: values.events});
+      setResult({
+        title: 'Correlation Agent Response',
+        content: (
+          <div className="text-sm space-y-2">
+            <p>
+              <span className="font-semibold">Verdict:</span>{' '}
+              <span
+                className={cn(
+                  'font-bold',
+                  response.areConnected ? 'text-destructive' : 'text-green-500'
+                )}
+              >
+                {response.areConnected ? 'Events are Connected' : 'Events are Not Connected'}
+              </span>
+            </p>
+            <p>
+              <span className="font-semibold">Analysis:</span> {response.correlationAnalysis}
+            </p>
+          </div>
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+      setResult({title: 'Error', content: <p>Failed to get correlation analysis from the AI agent.</p>});
+    }
+    setLoading(false);
+  };
+
   const currentFormSubmit = () => {
     switch (activeTab) {
       case 'email':
@@ -272,6 +318,8 @@ export function AnalysisClient() {
         return networkForm.handleSubmit(handleNetworkSubmit);
       case 'fraud':
         return fraudForm.handleSubmit(handleFraudSubmit);
+      case 'correlation':
+        return correlationForm.handleSubmit(handleCorrelationSubmit);
       default:
         return () => {};
     }
@@ -287,12 +335,13 @@ export function AnalysisClient() {
           setResult(null);
         }}
       >
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="email">Email Analyzer</TabsTrigger>
           <TabsTrigger value="url">URL Scanner</TabsTrigger>
           <TabsTrigger value="file">File Analyzer</TabsTrigger>
           <TabsTrigger value="network">Network Anomaly</TabsTrigger>
           <TabsTrigger value="fraud">Fraud Detection</TabsTrigger>
+          <TabsTrigger value="correlation">Correlation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="email">
@@ -424,6 +473,34 @@ export function AnalysisClient() {
                         <FormLabel>Activity Details</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Describe the user activity..." {...field} rows={6} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="correlation">
+          <Card>
+            <CardHeader>
+              <CardTitle>Correlation Agent</CardTitle>
+              <CardDescription>Correlate multiple threat events to find connections.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...correlationForm}>
+                <form onSubmit={correlationForm.handleSubmit(handleCorrelationSubmit)} className="space-y-4">
+                  <FormField
+                    control={correlationForm.control}
+                    name="events"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Events</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter events, one per line..." {...field} rows={6} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
