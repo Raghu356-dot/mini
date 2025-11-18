@@ -20,8 +20,9 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { IncidentResponse } from '@/lib/types';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 
 const getBadgeClass = (severity: IncidentResponse['severity']): string => {
@@ -39,9 +40,8 @@ const getBadgeClass = (severity: IncidentResponse['severity']): string => {
 
 export function IncidentResponseFeed() {
   const firestore = useFirestore();
-  const { data: responses, loading } = useCollection<IncidentResponse>(
-    firestore ? query(collection(firestore, 'incident_responses'), orderBy('timestamp', 'desc')) : null
-  );
+  const incidentsQuery = firestore ? query(collection(firestore, 'incident_responses'), orderBy('timestamp', 'desc')) : null;
+  const { data: responses, loading } = useCollection<IncidentResponse>(incidentsQuery);
 
   return (
     <Card>

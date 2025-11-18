@@ -1,10 +1,15 @@
 
+'use client';
+
 import { IncidentResponseFeed } from './_components/incident-response-feed';
 import { initializeFirebase, FirebaseClientProvider } from '@/firebase';
 
-const { firebaseApp, firestore, auth } = initializeFirebase();
+// Firebase initialization is now handled within the client provider context
+// to ensure it only runs on the client.
 
 export default function IncidentsPage() {
+  const { firebaseApp, firestore, auth } = initializeFirebase();
+
   return (
     <FirebaseClientProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
       <div className="space-y-8">
