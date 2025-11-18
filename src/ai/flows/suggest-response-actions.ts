@@ -48,7 +48,8 @@ const prompt = ai.definePrompt({
 
   Threat Type: {{{threatType}}}
   Risk Score: {{{riskScore}}}
-  Details: {{{details}}}
+  Details:
+  {{{details}}}
 
   Suggested Response Actions:`,
 });

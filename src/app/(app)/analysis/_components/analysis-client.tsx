@@ -24,8 +24,12 @@ const urlSchema = z.object({
   riskScore: z.coerce.number().min(0).max(100).default(88),
 });
 
+const MAX_FILE_SIZE = 5000000; // 5MB
 const fileSchema = z.object({
-  metadata: z.string().min(10, 'Please enter file metadata.'),
+  file: z
+    .any()
+    .refine(files => files?.length == 1, 'File is required.')
+    .refine(files => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`),
   riskScore: z.coerce.number().min(0).max(100).default(99),
 });
 
@@ -70,7 +74,6 @@ export function AnalysisClient() {
   const fileForm = useForm<z.infer<typeof fileSchema>>({
     resolver: zodResolver(fileSchema),
     defaultValues: {
-      metadata: 'File: invoice.zip, Size: 1.2MB, Hash: 5d8c3e...',
       riskScore: 99,
     },
   });
@@ -143,26 +146,44 @@ export function AnalysisClient() {
     setLoading(true);
     setResult(null);
     try {
-      const response = await suggestResponseActions({
-        threatType: 'Malware File',
-        riskScore: values.riskScore,
-        details: values.metadata,
-      });
-      setResult({
-        title: 'Malware File Analyzer Response',
-        content: (
-          <ul className="list-disc pl-5 space-y-1 text-sm">
-            {response.suggestedActions.map((action, i) => (
-              <li key={i}>{action}</li>
-            ))}
-          </ul>
-        ),
-      });
-    } catch (error) {
-      console.error(error);
-      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+      const file = values.file[0];
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = async () => {
+        const fileContent = reader.result as string;
+        try {
+          const response = await suggestResponseActions({
+            threatType: 'Malware File',
+            riskScore: values.riskScore,
+            details: `File Name: ${file.name}\nFile Size: ${file.size} bytes\n\nFile Content:\n${fileContent}`,
+          });
+          setResult({
+            title: 'Malware File Analyzer Response',
+            content: (
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                {response.suggestedActions.map((action, i) => (
+                  <li key={i}>{action}</li>
+                ))}
+              </ul>
+            ),
+          });
+        } catch (error) {
+          console.error(error);
+          setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+        } finally {
+          setLoading(false);
+        }
+      };
+      reader.onerror = () => {
+        console.error('Failed to read file');
+        setResult({title: 'Error', content: <p>Failed to read the uploaded file.</p>});
+        setLoading(false);
+      };
+    } catch (e) {
+      console.error(e);
+      setResult({title: 'Error', content: <p>An error occurred during file processing.</p>});
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleNetworkSubmit = async (values: z.infer<typeof networkSchema>) => {
@@ -328,19 +349,22 @@ export function AnalysisClient() {
           <Card>
             <CardHeader>
               <CardTitle>Malware File Analyzer</CardTitle>
-              <CardDescription>Analyze file metadata for malware signatures.</CardDescription>
+              <CardDescription>Analyze file contents for malware signatures.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...fileForm}>
                 <form onSubmit={fileForm.handleSubmit(handleFileSubmit)} className="space-y-4">
                   <FormField
                     control={fileForm.control}
-                    name="metadata"
+                    name="file"
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>File Metadata</FormLabel>
+                        <FormLabel>File</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Paste file metadata here..." {...field} rows={6} />
+                          <Input
+                            type="file"
+                            onChange={e => field.onChange(e.target.files)}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -484,5 +508,3 @@ export function AnalysisClient() {
     </div>
   );
 }
-
-    
