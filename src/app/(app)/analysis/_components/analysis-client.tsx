@@ -13,6 +13,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
 import {summarizeNetworkLogs} from '@/ai/flows/summarize-network-logs';
 import {analyzeFile} from '@/ai/flows/analyze-file';
+import {detectFraud} from '@/ai/flows/detect-fraud';
 import {Loader2, Sparkles} from 'lucide-react';
 
 const emailSchema = z.object({
@@ -38,10 +39,7 @@ const networkSchema = z.object({
 });
 
 const fraudSchema = z.object({
-  userId: z.string().min(1, 'User ID is required.'),
-  location: z.string().min(1, 'Location is required.'),
-  device: z.string().min(1, 'Device is required.'),
-  time: z.string().min(1, 'Time is required.'),
+  activityDetails: z.string().min(10, 'Please enter activity details.'),
 });
 
 type AnalysisResult = {
@@ -84,7 +82,9 @@ export function AnalysisClient() {
 
   const fraudForm = useForm<z.infer<typeof fraudSchema>>({
     resolver: zodResolver(fraudSchema),
-    defaultValues: {userId: '1058', location: 'Russia', device: 'Unknown', time: '3 AM'},
+    defaultValues: {
+      activityDetails: 'User 1058 logged in from Russia with an unknown device at 3 AM.',
+    },
   });
 
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
@@ -201,30 +201,36 @@ export function AnalysisClient() {
     setLoading(false);
   };
 
-  const handleFraudSubmit = (values: z.infer<typeof fraudSchema>) => {
+  const handleFraudSubmit = async (values: z.infer<typeof fraudSchema>) => {
     setLoading(true);
     setResult(null);
-    // Simulate AI processing as there is no specific AI flow for fraud
-    setTimeout(() => {
+    try {
+      const response = await detectFraud({activityDetails: values.activityDetails});
       setResult({
         title: 'Fraud Detection Agent Response',
         content: (
-          <div className="text-sm space-y-1">
-            <p className="font-semibold">Potential Fraud Detected</p>
+          <div className="text-sm space-y-2">
             <p>
-              <strong>Reason:</strong> Login from unusual country & device.
+              <span className="font-semibold">Verdict:</span>{' '}
+              {response.isFraudulent ? 'Potential Fraud Detected' : 'No Fraud Detected'}
             </p>
             <p>
-              <strong>Risk Score:</strong> 78%
+              <span className="font-semibold">Risk Score:</span> {response.riskScore}%
             </p>
             <p>
-              <strong>Action:</strong> Temporary account lock initiated.
+              <span className="font-semibold">Reason:</span> {response.reason}
+            </p>
+            <p>
+              <span className="font-semibold">Suggested Action:</span> {response.suggestedAction}
             </p>
           </div>
         ),
       });
-      setLoading(false);
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      setResult({title: 'Error', content: <p>Failed to get fraud analysis from the AI agent.</p>});
+    }
+    setLoading(false);
   };
 
   const currentFormSubmit = () => {
@@ -348,7 +354,7 @@ export function AnalysisClient() {
           <Card>
             <CardHeader>
               <CardTitle>Malware File Analyzer</CardTitle>
-              <CardDescription>Analyze file contents for malware signatures.</CardDescription>
+              <CardDescription>Upload a file to analyze its contents for malware.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...fileForm}>
@@ -360,10 +366,7 @@ export function AnalysisClient() {
                       <FormItem>
                         <FormLabel>File</FormLabel>
                         <FormControl>
-                          <Input
-                            type="file"
-                            onChange={e => field.onChange(e.target.files)}
-                          />
+                          <Input type="file" onChange={e => field.onChange(e.target.files)} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -414,51 +417,12 @@ export function AnalysisClient() {
                 <form onSubmit={fraudForm.handleSubmit(handleFraudSubmit)} className="space-y-4">
                   <FormField
                     control={fraudForm.control}
-                    name="userId"
+                    name="activityDetails"
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>User ID</FormLabel>
+                        <FormLabel>Activity Details</FormLabel>
                         <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={fraudForm.control}
-                    name="location"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={fraudForm.control}
-                    name="device"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Device</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={fraudForm.control}
-                    name="time"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Time</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
+                          <Textarea placeholder="Describe the user activity..." {...field} rows={6} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
