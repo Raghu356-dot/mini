@@ -157,39 +157,6 @@ export function AnalysisClient() {
       const eventDescription = `Email Analysis: Verdict - ${response.verdict}. Details: ${response.analysis}`;
       addEvent('Email Analyzer', eventDescription);
 
-      if (response.verdict === 'Malicious') {
-        toast({
-          variant: 'destructive',
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-white" />
-              <span className="font-bold">Malicious Email Detected</span>
-            </div>
-          ),
-          description: response.analysis,
-        });
-      } else if (response.verdict === 'Suspicious') {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-yellow-500" />
-              <span className="font-bold">Suspicious Email</span>
-            </div>
-          ),
-          description: response.analysis,
-        });
-      } else {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" />
-              <span className="font-bold">Email is Safe</span>
-            </div>
-          ),
-          description: 'No threats found in the email.',
-        });
-      }
-
       setResult({
         title: 'Email Analyzer Agent Response',
         content: (
@@ -217,39 +184,6 @@ export function AnalysisClient() {
       const response = await scanUrl({url: values.url});
       const eventDescription = `URL Scan: Verdict - ${response.verdict}. Details: ${response.analysis}`;
       addEvent('URL Scanner', eventDescription);
-
-      if (response.verdict === 'Malicious') {
-        toast({
-          variant: 'destructive',
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-white" />
-              <span className="font-bold">Malicious URL Detected</span>
-            </div>
-          ),
-          description: response.analysis,
-        });
-      } else if (response.verdict === 'Suspicious') {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-yellow-500" />
-              <span className="font-bold">Suspicious URL</span>
-            </div>
-          ),
-          description: response.analysis,
-        });
-      } else {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" />
-              <span className="font-bold">URL is Safe</span>
-            </div>
-          ),
-          description: 'No threats found for this URL.',
-        });
-      }
 
       setResult({
         title: 'URL Scanner Agent Response',
@@ -287,39 +221,6 @@ export function AnalysisClient() {
           });
           const eventDescription = `File Analysis: Verdict - ${response.verdict} for file ${file.name}. Details: ${response.analysis}`;
           addEvent('File Analyzer', eventDescription);
-
-          if (response.verdict === 'Malicious') {
-            toast({
-              variant: 'destructive',
-              title: (
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="text-white" />
-                  <span className="font-bold">Malicious File Detected</span>
-                </div>
-              ),
-              description: response.analysis,
-            });
-          } else if (response.verdict === 'Suspicious') {
-            toast({
-              title: (
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="text-yellow-500" />
-                  <span className="font-bold">Suspicious File</span>
-                </div>
-              ),
-              description: response.analysis,
-            });
-          } else {
-            toast({
-              title: (
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="text-green-500" />
-                  <span className="font-bold">File is Safe</span>
-                </div>
-              ),
-              description: 'No threats found in the file.',
-            });
-          }
 
           setResult({
             title: 'Malware File Analyzer Response',
@@ -360,15 +261,6 @@ export function AnalysisClient() {
       const response = await summarizeNetworkLogs({networkLogs: values.logs});
       const eventDescription = `Network Anomaly: ${response.summary}`;
       addEvent('Network Anomaly', eventDescription);
-      toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="text-yellow-500" />
-            <span className="font-bold">Network Log Summary</span>
-          </div>
-        ),
-        description: response.summary,
-      });
       setResult({
         title: 'Network Anomaly Agent Response',
         content: <p className="text-sm">{response.summary}</p>,
@@ -389,29 +281,6 @@ export function AnalysisClient() {
         response.isFraudulent ? 'Fraudulent' : 'Not Fraudulent'
       }, Risk - ${response.riskScore}%. Reason: ${response.reason}`;
       addEvent('Fraud Detection', eventDescription);
-
-      if (response.isFraudulent) {
-        toast({
-          variant: 'destructive',
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-white" />
-              <span className="font-bold">Potential Fraud Detected</span>
-            </div>
-          ),
-          description: `Activity with risk score ${response.riskScore}% was flagged. ${response.suggestedAction}`,
-        });
-      } else {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" />
-              <span className="font-bold">Activity Clear</span>
-            </div>
-          ),
-          description: `The analyzed activity appears to be legitimate (Risk: ${response.riskScore}%).`,
-        });
-      }
 
       setResult({
         title: 'Fraud Detection Agent Response',
@@ -474,28 +343,6 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await correlateEvents({events: values.selectedEvents.join('\n')});
-      if (response.areConnected) {
-        toast({
-          variant: 'destructive',
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="text-white" />
-              <span className="font-bold">Correlated Events Detected</span>
-            </div>
-          ),
-          description: response.correlationAnalysis,
-        });
-      } else {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" />
-              <span className="font-bold">Events Not Correlated</span>
-            </div>
-          ),
-          description: response.correlationAnalysis,
-        });
-      }
       setResult({
         title: 'Correlation Agent Response',
         content: (
@@ -529,15 +376,6 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await suggestResponseActions(values);
-      toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="text-green-500" />
-            <span className="font-bold">Threat Mitigated</span>
-          </div>
-        ),
-        description: `Automated response for ${values.threatType} (Risk: ${values.riskScore}%) has been executed.`,
-      });
       setResult({
         title: 'Incident Response Actions Performed',
         content: (
@@ -555,11 +393,6 @@ export function AnalysisClient() {
       });
     } catch (error) {
       console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to get response from the AI agent.',
-      });
       setResult({
         title: 'Error',
         content: <p>Failed to get automated response from the AI agent.</p>,
