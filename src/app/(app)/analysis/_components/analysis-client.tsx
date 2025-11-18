@@ -633,5 +633,3 @@ export function AnalysisClient() {
     </Tabs>
   );
 }
-
-    
