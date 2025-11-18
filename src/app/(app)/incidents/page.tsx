@@ -3,12 +3,29 @@
 
 import { IncidentResponseFeed } from './_components/incident-response-feed';
 import { initializeFirebase, FirebaseClientProvider } from '@/firebase';
-
-// Firebase initialization is now handled within the client provider context
-// to ensure it only runs on the client.
+import type { FirebaseApp } from 'firebase/app';
+import type { Auth } from 'firebase/auth';
+import type { Firestore } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 
 export default function IncidentsPage() {
-  const { firebaseApp, firestore, auth } = initializeFirebase();
+  const [firebaseInstances, setFirebaseInstances] = useState<{
+    firebaseApp: FirebaseApp;
+    auth: Auth;
+    firestore: Firestore;
+  } | null>(null);
+
+  useEffect(() => {
+    // Initialize Firebase only on the client side
+    setFirebaseInstances(initializeFirebase());
+  }, []);
+
+  if (!firebaseInstances) {
+    // You can return a loader here if you want
+    return null; 
+  }
+
+  const { firebaseApp, firestore, auth } = firebaseInstances;
 
   return (
     <FirebaseClientProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
