@@ -4,7 +4,6 @@ import {SidebarTrigger} from '@/components/ui/sidebar';
 
 const pageTitles: {[key: string]: string} = {
   '/analysis': 'Threat Analysis',
-  '/incidents': 'Incident Response',
   '/settings': 'Settings',
   '/history': 'History',
 };

@@ -1,4 +1,4 @@
-import type {ThreatEvent, User, IncidentResponse} from './types';
+import type {ThreatEvent, User} from './types';
 
 export const mockUser: User = {
   id: 'user-1',
@@ -67,44 +67,4 @@ export const mockThreats: ThreatEvent[] = [
     status: 'Detected',
     agent: 'Phishing & Malware',
   },
-];
-
-
-export const mockIncidentResponses: IncidentResponse[] = [
-    {
-      id: 'resp-1',
-      eventId: 'threat-2',
-      threatType: 'Intrusion',
-      severity: 'high',
-      recommendedAction: 'Block IP',
-      simulatedResult: 'IP 45.88.23.1 added to simulated blocklist.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    },
-    {
-      id: 'resp-2',
-      eventId: 'threat-3',
-      threatType: 'Fraud',
-      severity: 'high',
-      recommendedAction: 'Disable user session',
-      simulatedResult: "Active session for user 'user-1058' has been terminated in simulation.",
-      timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-    {
-      id: 'resp-3',
-      eventId: 'threat-1',
-      threatType: 'Phishing',
-      severity: 'high',
-      recommendedAction: 'Flag for manual review',
-      simulatedResult: 'Email from john.doe@example.com flagged for manual review.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-    },
-     {
-      id: 'resp-4',
-      eventId: 'threat-6',
-      threatType: 'Phishing',
-      severity: 'medium',
-      recommendedAction: 'Record in threat log',
-      simulatedResult: 'Threat details recorded in simulation log.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 62).toISOString(),
-    },
 ];
