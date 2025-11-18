@@ -12,6 +12,7 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
 import {summarizeNetworkLogs} from '@/ai/flows/summarize-network-logs';
+import {analyzeFile} from '@/ai/flows/analyze-file';
 import {Loader2, Sparkles} from 'lucide-react';
 
 const emailSchema = z.object({
@@ -30,7 +31,6 @@ const fileSchema = z.object({
     .any()
     .refine(files => files?.length == 1, 'File is required.')
     .refine(files => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`),
-  riskScore: z.coerce.number().min(0).max(100).default(99),
 });
 
 const networkSchema = z.object({
@@ -73,9 +73,6 @@ export function AnalysisClient() {
 
   const fileForm = useForm<z.infer<typeof fileSchema>>({
     resolver: zodResolver(fileSchema),
-    defaultValues: {
-      riskScore: 99,
-    },
   });
 
   const networkForm = useForm<z.infer<typeof networkSchema>>({
@@ -152,24 +149,26 @@ export function AnalysisClient() {
       reader.onload = async () => {
         const fileContent = reader.result as string;
         try {
-          const response = await suggestResponseActions({
-            threatType: 'Malware File',
-            riskScore: values.riskScore,
-            details: `File Name: ${file.name}\nFile Size: ${file.size} bytes\n\nFile Content:\n${fileContent}`,
+          const response = await analyzeFile({
+            fileName: file.name,
+            fileContent: fileContent,
           });
           setResult({
             title: 'Malware File Analyzer Response',
             content: (
-              <ul className="list-disc pl-5 space-y-1 text-sm">
-                {response.suggestedActions.map((action, i) => (
-                  <li key={i}>{action}</li>
-                ))}
-              </ul>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="font-semibold">Verdict:</span> {response.verdict}
+                </p>
+                <p>
+                  <span className="font-semibold">Analysis:</span> {response.analysis}
+                </p>
+              </div>
             ),
           });
         } catch (error) {
           console.error(error);
-          setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+          setResult({title: 'Error', content: <p>Failed to get analysis from the AI agent.</p>});
         } finally {
           setLoading(false);
         }
@@ -365,19 +364,6 @@ export function AnalysisClient() {
                             type="file"
                             onChange={e => field.onChange(e.target.files)}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={fileForm.control}
-                    name="riskScore"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Simulated Risk Score</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
