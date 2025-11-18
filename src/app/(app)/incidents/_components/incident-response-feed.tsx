@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -21,7 +20,8 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { IncidentResponse } from '@/lib/types';
-import { mockIncidentResponses } from '@/lib/data';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 
 const getBadgeClass = (severity: IncidentResponse['severity']): string => {
@@ -38,14 +38,10 @@ const getBadgeClass = (severity: IncidentResponse['severity']): string => {
 };
 
 export function IncidentResponseFeed() {
-  const [responses, setResponses] = useState<IncidentResponse[]>(mockIncidentResponses);
-
-  // NOTE: In a real application, you would use a real-time listener to Firestore
-  // to get the incident responses. For this demo, we'll use mock data.
-  useEffect(() => {
-    // This is where you would set up a Firestore listener
-    // e.g. onSnapshot(collection(db, 'incident_responses'), ...)
-  }, []);
+  const firestore = useFirestore();
+  const { data: responses, loading } = useCollection<IncidentResponse>(
+    firestore ? query(collection(firestore, 'incident_responses'), orderBy('timestamp', 'desc')) : null
+  );
 
   return (
     <Card>
@@ -68,14 +64,21 @@ export function IncidentResponseFeed() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {responses.length === 0 && (
+              {loading && (
+                 <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    Loading responses...
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && (!responses || responses.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     No incident responses logged yet.
                   </TableCell>
                 </TableRow>
               )}
-              {responses.map((response) => (
+              {responses && responses.map((response) => (
                 <TableRow key={response.id} className="transition-all hover:bg-muted/50">
                   <TableCell className="font-medium">{response.threatType}</TableCell>
                   <TableCell>
@@ -89,7 +92,7 @@ export function IncidentResponseFeed() {
                   <TableCell>{response.recommendedAction}</TableCell>
                   <TableCell className="text-muted-foreground">{response.simulatedResult}</TableCell>
                   <TableCell className="text-muted-foreground text-right">
-                    {formatDistanceToNow(new Date(response.timestamp), { addSuffix: true })}
+                    {response.timestamp ? formatDistanceToNow(new Date(response.timestamp.seconds * 1000), { addSuffix: true }) : 'Just now'}
                   </TableCell>
                 </TableRow>
               ))}

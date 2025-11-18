@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        }
+      }
+    },
+    "IncidentResponse": {
+      "title": "Incident Response",
+      "description": "An automated response to a detected security incident.",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "The ID of the threat event that triggered this response."
+        },
+        "threatType": {
+          "type": "string",
+          "description": "The type of threat detected (e.g., 'Port Scan', 'Phishing')."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "The assessed severity of the threat."
+        },
+        "recommendedAction": {
+          "type": "string",
+          "description": "The simulated action taken in response to the threat."
+        },
+        "simulatedResult": {
+          "type": "string",
+          "description": "A description of the outcome of the simulated action."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of when the response was generated."
+        }
+      },
+      "required": ["eventId", "threatType", "severity", "recommendedAction", "simulatedResult", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["anonymous"]
+  },
+  "firestore": {
+    "/incident_responses/{responseId}": {
+      "schema": {
+        "$ref": "#/entities/IncidentResponse"
+      },
+      "description": "Stores records of automated incident responses."
+    }
+  }
+}

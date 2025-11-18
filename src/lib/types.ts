@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type ThreatEvent = {
   id: string;
   timestamp: string;
@@ -29,5 +31,5 @@ export type IncidentResponse = {
   severity: 'low' | 'medium' | 'high';
   recommendedAction: string;
   simulatedResult: string;
-  timestamp: string;
+  timestamp: Timestamp;
 };
