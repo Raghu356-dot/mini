@@ -18,6 +18,7 @@ import {scanUrl} from '@/ai/flows/scan-url';
 import {correlateEvents} from '@/ai/flows/correlate-events';
 import {Loader2, Sparkles} from 'lucide-react';
 import {cn} from '@/lib/utils';
+import {Checkbox} from '@/components/ui/checkbox';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
@@ -44,7 +45,7 @@ const fraudSchema = z.object({
 });
 
 const correlationSchema = z.object({
-  events: z.string().min(20, 'Please enter at least two events to correlate.'),
+  selectedEvents: z.array(z.string()).min(2, 'Please select at least two events to correlate.'),
 });
 
 type AnalysisResult = {
@@ -52,15 +53,22 @@ type AnalysisResult = {
   content: React.ReactNode;
 };
 
+type LoggedEvent = {
+  id: string;
+  timestamp: string;
+  description: string;
+  agent: string;
+};
+
 const Verdict = ({verdict}: {verdict: 'Malicious' | 'Suspicious' | 'Safe' | string}) => {
   const verdictColor =
     verdict === 'Malicious'
       ? 'text-destructive'
       : verdict === 'Suspicious'
-        ? 'text-yellow-500'
-        : verdict === 'Safe'
-          ? 'text-green-500'
-          : '';
+      ? 'text-yellow-500'
+      : verdict === 'Safe'
+      ? 'text-green-500'
+      : '';
   return <span className={cn('font-bold', verdictColor)}>{verdict}</span>;
 };
 
@@ -68,6 +76,18 @@ export function AnalysisClient() {
   const [activeTab, setActiveTab] = useState('email');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [loggedEvents, setLoggedEvents] = useState<LoggedEvent[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+
+  const addEvent = (agent: string, description: string) => {
+    const newEvent: LoggedEvent = {
+      id: `event-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      agent,
+      description,
+    };
+    setLoggedEvents(prev => [newEvent, ...prev]);
+  };
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -102,11 +122,10 @@ export function AnalysisClient() {
     },
   });
 
-  const correlationForm = useForm<z.infer<typeof correlationSchema>>({
+  const correlationForm = useForm<{selectedEvents: string[]}>({
     resolver: zodResolver(correlationSchema),
     defaultValues: {
-      events:
-        'Event 1: Phishing email detected from john.doe@example.com.\nEvent 2: Unusual port scanning from IP 45.88.23.1, which was a link in the email.',
+      selectedEvents: [],
     },
   });
 
@@ -115,6 +134,8 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await analyzeEmail({emailContent: values.content});
+      const eventDescription = `Email Analysis: Verdict - ${response.verdict}. Details: ${response.analysis}`;
+      addEvent('Email Analyzer', eventDescription);
       setResult({
         title: 'Email Analyzer Agent Response',
         content: (
@@ -140,6 +161,8 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await scanUrl({url: values.url});
+      const eventDescription = `URL Scan: Verdict - ${response.verdict}. Details: ${response.analysis}`;
+      addEvent('URL Scanner', eventDescription);
       setResult({
         title: 'URL Scanner Agent Response',
         content: (
@@ -174,6 +197,8 @@ export function AnalysisClient() {
             fileName: file.name,
             fileContent: fileContent,
           });
+          const eventDescription = `File Analysis: Verdict - ${response.verdict} for file ${file.name}. Details: ${response.analysis}`;
+          addEvent('File Analyzer', eventDescription);
           setResult({
             title: 'Malware File Analyzer Response',
             content: (
@@ -211,6 +236,8 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await summarizeNetworkLogs({networkLogs: values.logs});
+      const eventDescription = `Network Anomaly: ${response.summary}`;
+      addEvent('Network Anomaly', eventDescription);
       setResult({
         title: 'Network Anomaly Agent Response',
         content: <p className="text-sm">{response.summary}</p>,
@@ -227,6 +254,10 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await detectFraud({activityDetails: values.activityDetails});
+      const eventDescription = `Fraud Detection: Verdict - ${
+        response.isFraudulent ? 'Fraudulent' : 'Not Fraudulent'
+      }, Risk - ${response.riskScore}%. Reason: ${response.reason}`;
+      addEvent('Fraud Detection', eventDescription);
       setResult({
         title: 'Fraud Detection Agent Response',
         content: (
@@ -250,8 +281,8 @@ export function AnalysisClient() {
                   response.riskScore > 80
                     ? 'text-destructive'
                     : response.riskScore > 60
-                      ? 'text-yellow-500'
-                      : 'text-green-500'
+                    ? 'text-yellow-500'
+                    : 'text-green-500'
                 )}
               >
                 {response.riskScore}%
@@ -273,11 +304,21 @@ export function AnalysisClient() {
     setLoading(false);
   };
 
-  const handleCorrelationSubmit = async (values: z.infer<typeof correlationSchema>) => {
+  const handleCorrelationSubmit = async () => {
+    const values = correlationForm.getValues();
+    if (values.selectedEvents.length < 2) {
+      correlationForm.setError('selectedEvents', {
+        type: 'manual',
+        message: 'Please select at least two events to correlate.',
+      });
+      return;
+    }
+    correlationForm.clearErrors('selectedEvents');
+
     setLoading(true);
     setResult(null);
     try {
-      const response = await correlateEvents({events: values.events});
+      const response = await correlateEvents({events: values.selectedEvents.join('\n')});
       setResult({
         title: 'Correlation Agent Response',
         content: (
@@ -319,10 +360,19 @@ export function AnalysisClient() {
       case 'fraud':
         return fraudForm.handleSubmit(handleFraudSubmit);
       case 'correlation':
-        return correlationForm.handleSubmit(handleCorrelationSubmit);
+        return handleCorrelationSubmit;
       default:
         return () => {};
     }
+  };
+
+  const handleEventSelectionChange = (eventId: string) => {
+    const currentSelected = correlationForm.getValues('selectedEvents');
+    const newSelected = currentSelected.includes(eventId)
+      ? currentSelected.filter(id => id !== eventId)
+      : [...currentSelected, eventId];
+    correlationForm.setValue('selectedEvents', newSelected);
+    setSelectedEvents(newSelected); // To trigger re-render
   };
 
   return (
@@ -337,12 +387,24 @@ export function AnalysisClient() {
     >
       <div className="col-span-1">
         <TabsList className="flex flex-col h-full w-full bg-transparent p-0">
-          <TabsTrigger value="email" className="w-full justify-start text-base p-3">Email Analyzer</TabsTrigger>
-          <TabsTrigger value="url" className="w-full justify-start text-base p-3">URL Scanner</TabsTrigger>
-          <TabsTrigger value="file" className="w-full justify-start text-base p-3">File Analyzer</TabsTrigger>
-          <TabsTrigger value="network" className="w-full justify-start text-base p-3">Network Anomaly</TabsTrigger>
-          <TabsTrigger value="fraud" className="w-full justify-start text-base p-3">Fraud Detection</TabsTrigger>
-          <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">Correlation</TabsTrigger>
+          <TabsTrigger value="email" className="w-full justify-start text-base p-3">
+            Email Analyzer
+          </TabsTrigger>
+          <TabsTrigger value="url" className="w-full justify-start text-base p-3">
+            URL Scanner
+          </TabsTrigger>
+          <TabsTrigger value="file" className="w-full justify-start text-base p-3">
+            File Analyzer
+          </TabsTrigger>
+          <TabsTrigger value="network" className="w-full justify-start text-base p-3">
+            Network Anomaly
+          </TabsTrigger>
+          <TabsTrigger value="fraud" className="w-full justify-start text-base p-3">
+            Fraud Detection
+          </TabsTrigger>
+          <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">
+            Correlation
+          </TabsTrigger>
         </TabsList>
       </div>
 
@@ -491,20 +553,58 @@ export function AnalysisClient() {
           <Card>
             <CardHeader>
               <CardTitle>Correlation Agent</CardTitle>
-              <CardDescription>Correlate multiple threat events to find connections.</CardDescription>
+              <CardDescription>Select events from other agents to find connections.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...correlationForm}>
-                <form onSubmit={correlationForm.handleSubmit(handleCorrelationSubmit)} className="space-y-4">
+                <form onSubmit={e => {
+                  e.preventDefault();
+                  handleCorrelationSubmit();
+                }} className="space-y-4">
                   <FormField
                     control={correlationForm.control}
-                    name="events"
-                    render={({field}) => (
+                    name="selectedEvents"
+                    render={() => (
                       <FormItem>
-                        <FormLabel>Events</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Enter events, one per line..." {...field} rows={6} />
-                        </FormControl>
+                        <div className="mb-4">
+                          <FormLabel className="text-base">Logged Events</FormLabel>
+                          <p className="text-sm text-muted-foreground">Select at least two events to correlate.</p>
+                        </div>
+                        <div className="space-y-2 h-64 overflow-y-auto border p-2 rounded-md">
+                          {loggedEvents.length === 0 && (
+                            <p className="text-muted-foreground text-sm text-center py-4">
+                              No events logged yet. Run other agents to generate events.
+                            </p>
+                          )}
+                          {loggedEvents.map(event => (
+                            <FormField
+                              key={event.id}
+                              control={correlationForm.control}
+                              name="selectedEvents"
+                              render={() => {
+                                return (
+                                  <FormItem
+                                    key={event.id}
+                                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-accent hover:text-accent-foreground transition-colors"
+                                  >
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={correlationForm.getValues('selectedEvents').includes(event.description)}
+                                        onCheckedChange={() => handleEventSelectionChange(event.description)}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                      <FormLabel className="font-normal">{event.description}</FormLabel>
+                                      <p className="text-xs text-muted-foreground">
+                                        {event.agent} - {new Date(event.timestamp).toLocaleTimeString()}
+                                      </p>
+                                    </div>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -539,5 +639,3 @@ export function AnalysisClient() {
     </Tabs>
   );
 }
-
-    
