@@ -68,12 +68,10 @@ export function SidebarNav() {
             </div>
           )}
         </div>
-        <SidebarMenuButton asChild>
-          <Link href="/login">
-            <Button variant="ghost" className="w-full justify-start">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </Button>
+        <SidebarMenuButton>
+          <Link href="/login" className="flex w-full items-center gap-2">
+            <LogOut />
+            <span>Logout</span>
           </Link>
         </SidebarMenuButton>
       </SidebarFooter>

@@ -30,9 +30,9 @@ export default function LoginPage() {
               </div>
               <Input id="password" type="password" required defaultValue="password" />
             </div>
-            <Link href="/dashboard" className="w-full" passHref>
-              <Button className="w-full">Login</Button>
-            </Link>
+            <Button asChild className="w-full">
+              <Link href="/dashboard">Login</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
