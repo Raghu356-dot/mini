@@ -18,7 +18,7 @@ const AnalyzeFileInputSchema = z.object({
 export type AnalyzeFileInput = z.infer<typeof AnalyzeFileInputSchema>;
 
 const AnalyzeFileOutputSchema = z.object({
-  verdict: z.enum(['Malicious', 'Suspicious', 'Benign']).describe('The verdict of the analysis.'),
+  verdict: z.enum(['Malicious', 'Suspicious', 'Safe']).describe('The verdict of the analysis.'),
   analysis: z.string().describe('A summary of the analysis findings.'),
 });
 export type AnalyzeFileOutput = z.infer<typeof AnalyzeFileOutputSchema>;
@@ -31,7 +31,7 @@ const prompt = ai.definePrompt({
   name: 'analyzeFilePrompt',
   input: {schema: AnalyzeFileInputSchema},
   output: {schema: AnalyzeFileOutputSchema},
-  prompt: `You are an expert cybersecurity analyst specializing in malware detection. Analyze the following file content and provide a verdict and a brief analysis.
+  prompt: `You are an expert cybersecurity analyst specializing in malware detection. Analyze the following file content and provide a verdict (Malicious, Suspicious, or Safe) and a brief analysis.
 
 File Name: {{{fileName}}}
 

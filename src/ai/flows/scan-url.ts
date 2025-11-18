@@ -17,7 +17,7 @@ const ScanUrlInputSchema = z.object({
 export type ScanUrlInput = z.infer<typeof ScanUrlInputSchema>;
 
 const ScanUrlOutputSchema = z.object({
-  verdict: z.enum(['Malicious', 'Suspicious', 'Benign']).describe('The verdict of the scan.'),
+  verdict: z.enum(['Malicious', 'Suspicious', 'Safe']).describe('The verdict of the scan.'),
   analysis: z.string().describe('A summary of the scan findings and reasoning.'),
 });
 export type ScanUrlOutput = z.infer<typeof ScanUrlOutputSchema>;
@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'scanUrlPrompt',
   input: {schema: ScanUrlInputSchema},
   output: {schema: ScanUrlOutputSchema},
-  prompt: `You are an expert cybersecurity analyst specializing in identifying malicious URLs. Analyze the following URL and provide a verdict (Malicious, Suspicious, or Benign) and a brief analysis explaining your reasoning. Consider the domain, path, and any query parameters.
+  prompt: `You are an expert cybersecurity analyst specializing in identifying malicious URLs. Analyze the following URL and provide a verdict (Malicious, Suspicious, or Safe) and a brief analysis explaining your reasoning. Consider the domain, path, and any query parameters.
 
 URL: {{{url}}}`,
 });

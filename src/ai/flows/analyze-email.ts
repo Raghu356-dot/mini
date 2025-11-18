@@ -17,7 +17,7 @@ const AnalyzeEmailInputSchema = z.object({
 export type AnalyzeEmailInput = z.infer<typeof AnalyzeEmailInputSchema>;
 
 const AnalyzeEmailOutputSchema = z.object({
-  verdict: z.enum(['Malicious', 'Suspicious', 'Benign']).describe('The verdict of the analysis.'),
+  verdict: z.enum(['Malicious', 'Suspicious', 'Safe']).describe('The verdict of the analysis.'),
   analysis: z.string().describe('A summary of the analysis findings and reasoning.'),
 });
 export type AnalyzeEmailOutput = z.infer<typeof AnalyzeEmailOutputSchema>;
@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'analyzeEmailPrompt',
   input: {schema: AnalyzeEmailInputSchema},
   output: {schema: AnalyzeEmailOutputSchema},
-  prompt: `You are an expert cybersecurity analyst specializing in phishing and malware detection within emails. Analyze the following email content and provide a verdict (Malicious, Suspicious, or Benign) and a brief analysis explaining your reasoning.
+  prompt: `You are an expert cybersecurity analyst specializing in phishing and malware detection within emails. Analyze the following email content and provide a verdict (Malicious, Suspicious, or Safe) and a brief analysis explaining your reasoning.
 
 Email Content:
 {{{emailContent}}}`,

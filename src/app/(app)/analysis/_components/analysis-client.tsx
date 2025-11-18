@@ -47,13 +47,13 @@ type AnalysisResult = {
   content: React.ReactNode;
 };
 
-const Verdict = ({verdict}: {verdict: 'Malicious' | 'Suspicious' | 'Benign' | string}) => {
+const Verdict = ({verdict}: {verdict: 'Malicious' | 'Suspicious' | 'Safe' | string}) => {
   const verdictColor =
     verdict === 'Malicious'
       ? 'text-destructive'
       : verdict === 'Suspicious'
         ? 'text-yellow-500'
-        : verdict === 'Benign'
+        : verdict === 'Safe'
           ? 'text-green-500'
           : '';
   return <span className={cn('font-bold', verdictColor)}>{verdict}</span>;
