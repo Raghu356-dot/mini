@@ -16,12 +16,11 @@ import {detectFraud} from '@/ai/flows/detect-fraud';
 import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
 import {correlateEvents} from '@/ai/flows/correlate-events';
-import {Loader2, Sparkles, ShieldCheck, AlertTriangle} from 'lucide-react';
+import {Loader2, Sparkles} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {Checkbox} from '@/components/ui/checkbox';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Slider} from '@/components/ui/slider';
-import {useToast} from '@/hooks/use-toast';
+import type {LoggedEvent} from '@/lib/types';
+import {useEventLogger} from '@/hooks/use-event-logger';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
@@ -56,13 +55,6 @@ type AnalysisResult = {
   content: React.ReactNode;
 };
 
-type LoggedEvent = {
-  id: string;
-  timestamp: string;
-  description: string;
-  agent: string;
-};
-
 const Verdict = ({verdict}: {verdict: 'Malicious' | 'Suspicious' | 'Safe' | string}) => {
   const verdictColor =
     verdict === 'Malicious'
@@ -79,19 +71,8 @@ export function AnalysisClient() {
   const [activeTab, setActiveTab] = useState('email');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [loggedEvents, setLoggedEvents] = useState<LoggedEvent[]>([]);
+  const {loggedEvents, addEvent} = useEventLogger();
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-  const {toast} = useToast();
-
-  const addEvent = (agent: string, description: string) => {
-    const newEvent: LoggedEvent = {
-      id: `event-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      agent,
-      description,
-    };
-    setLoggedEvents(prev => [newEvent, ...prev]);
-  };
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),

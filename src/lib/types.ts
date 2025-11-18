@@ -14,3 +14,10 @@ export type User = {
   name: string;
   email: string;
 };
+
+export type LoggedEvent = {
+  id: string;
+  timestamp: string;
+  agent: string;
+  description: string;
+};

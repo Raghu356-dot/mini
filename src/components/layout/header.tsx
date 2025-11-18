@@ -5,6 +5,7 @@ import {SidebarTrigger} from '@/components/ui/sidebar';
 const pageTitles: {[key: string]: string} = {
   '/analysis': 'Threat Analysis',
   '/settings': 'Settings',
+  '/history': 'History',
 };
 
 export function Header() {
