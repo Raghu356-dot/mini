@@ -21,3 +21,13 @@ export type LoggedEvent = {
   agent: string;
   description: string;
 };
+
+export type IncidentResponse = {
+  id: string;
+  eventId: string;
+  threatType: string;
+  severity: 'low' | 'medium' | 'high';
+  recommendedAction: string;
+  simulatedResult: string;
+  timestamp: string;
+};

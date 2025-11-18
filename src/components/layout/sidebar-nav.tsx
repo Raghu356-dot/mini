@@ -11,10 +11,11 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import {BrainCircuit, History} from 'lucide-react';
+import {BrainCircuit, History, ShieldAlert} from 'lucide-react';
 
 const navItems = [
   {href: '/analysis', icon: BrainCircuit, label: 'Threat Analysis'},
+  {href: '/incidents', icon: ShieldAlert, label: 'Incident Response'},
   {href: '/history', icon: History, label: 'History'},
 ];
 
