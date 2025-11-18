@@ -8,3 +8,4 @@ import '@/ai/flows/detect-fraud.ts';
 import '@/ai/flows/analyze-email.ts';
 import '@/ai/flows/scan-url.ts';
 import '@/ai/flows/correlate-events.ts';
+import '@/ai/flows/automated-incident-response.ts';
