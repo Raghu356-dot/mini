@@ -10,26 +10,17 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  useSidebar,
 } from '@/components/ui/sidebar';
-import {BrainCircuit, BotMessageSquare} from 'lucide-react';
+import {BrainCircuit} from 'lucide-react';
 
 const navItems = [{href: '/analysis', icon: BrainCircuit, label: 'Threat Analysis'}];
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const {open} = useSidebar();
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary">
-            <BotMessageSquare className="h-8 w-8 text-primary-foreground" />
-          </div>
-          {open && <h1 className="text-2xl font-bold font-headline text-foreground">CyberMind</h1>}
-        </div>
-      </SidebarHeader>
+      <SidebarHeader className="p-4"></SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
           {navItems.map(item => (
