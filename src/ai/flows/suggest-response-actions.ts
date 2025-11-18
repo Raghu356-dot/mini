@@ -26,9 +26,9 @@ const SuggestResponseActionsInputSchema = z.object({
 export type SuggestResponseActionsInput = z.infer<typeof SuggestResponseActionsInputSchema>;
 
 const SuggestResponseActionsOutputSchema = z.object({
-  suggestedActions: z
+  performedActions: z
     .array(z.string())
-    .describe('An array of suggested response actions based on the threat type and risk score.'),
+    .describe('An array of mitigation actions that have been automatically performed.'),
 });
 export type SuggestResponseActionsOutput = z.infer<typeof SuggestResponseActionsOutputSchema>;
 
@@ -42,16 +42,16 @@ const prompt = ai.definePrompt({
   name: 'suggestResponseActionsPrompt',
   input: {schema: SuggestResponseActionsInputSchema},
   output: {schema: SuggestResponseActionsOutputSchema},
-  prompt: `You are a cybersecurity expert tasked with suggesting response actions based on the type of threat detected and its risk score.
+  prompt: `You are a cybersecurity automated response system. Based on the provided threat information, determine and perform the necessary mitigation actions.
 
-  Based on the following threat information, suggest appropriate response actions. Provide the response as a list of actions.
+  Your response should be a list of the specific actions you have taken. For example: "Blocked IP address 123.45.67.89 on the firewall." or "Isolated device 'dev-hostname' from the network."
 
   Threat Type: {{{threatType}}}
   Risk Score: {{{riskScore}}}
   Details:
   {{{details}}}
 
-  Suggested Response Actions:`,
+  Return the list of actions taken in the 'performedActions' field.`,
 });
 
 const suggestResponseActionsFlow = ai.defineFlow(

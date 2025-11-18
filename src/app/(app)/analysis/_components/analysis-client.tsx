@@ -17,11 +17,12 @@ import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
 import {correlateEvents} from '@/ai/flows/correlate-events';
 import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
-import {Loader2, Sparkles} from 'lucide-react';
+import {Loader2, Sparkles, ShieldCheck} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Slider} from '@/components/ui/slider';
+import {useToast} from '@/hooks/use-toast';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
@@ -87,6 +88,7 @@ export function AnalysisClient() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loggedEvents, setLoggedEvents] = useState<LoggedEvent[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+  const {toast} = useToast();
 
   const addEvent = (agent: string, description: string) => {
     const newEvent: LoggedEvent = {
@@ -370,13 +372,24 @@ export function AnalysisClient() {
     setResult(null);
     try {
       const response = await suggestResponseActions(values);
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-green-500" />
+            <span className="font-bold">Threat Mitigated</span>
+          </div>
+        ),
+        description: `Automated response for ${values.threatType} (Risk: ${values.riskScore}%) has been executed.`,
+      });
       setResult({
-        title: 'Incident Response Agent Suggestions',
+        title: 'Incident Response Actions Performed',
         content: (
           <div className="text-sm space-y-2">
-            <p className="font-semibold">Based on the threat details, here are the suggested actions:</p>
+            <p className="font-semibold">
+              The following automated mitigation actions have been performed:
+            </p>
             <ul className="list-disc list-inside space-y-1 pl-2">
-              {response.suggestedActions.map((action, index) => (
+              {response.performedActions.map((action, index) => (
                 <li key={index}>{action}</li>
               ))}
             </ul>
@@ -385,7 +398,15 @@ export function AnalysisClient() {
       });
     } catch (error) {
       console.error(error);
-      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to get response from the AI agent.',
+      });
+      setResult({
+        title: 'Error',
+        content: <p>Failed to get automated response from the AI agent.</p>,
+      });
     }
     setLoading(false);
   };
@@ -671,7 +692,7 @@ export function AnalysisClient() {
             <CardHeader>
               <CardTitle>Automated Incident Response</CardTitle>
               <CardDescription>
-                Get automated response suggestions for a confirmed threat.
+                Perform automatic mitigation for a confirmed threat.
               </CardDescription>
             </CardHeader>
             <CardContent>
