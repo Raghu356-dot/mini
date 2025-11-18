@@ -326,24 +326,27 @@ export function AnalysisClient() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <Tabs
-        defaultValue="email"
-        className="w-full"
-        onValueChange={id => {
-          setActiveTab(id);
-          setResult(null);
-        }}
-      >
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="email">Email Analyzer</TabsTrigger>
-          <TabsTrigger value="url">URL Scanner</TabsTrigger>
-          <TabsTrigger value="file">File Analyzer</TabsTrigger>
-          <TabsTrigger value="network">Network Anomaly</TabsTrigger>
-          <TabsTrigger value="fraud">Fraud Detection</TabsTrigger>
-          <TabsTrigger value="correlation">Correlation</TabsTrigger>
+    <Tabs
+      defaultValue="email"
+      orientation="vertical"
+      className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start"
+      onValueChange={id => {
+        setActiveTab(id);
+        setResult(null);
+      }}
+    >
+      <div className="col-span-1">
+        <TabsList className="flex flex-col h-full w-full bg-transparent p-0">
+          <TabsTrigger value="email" className="w-full justify-start text-base p-3">Email Analyzer</TabsTrigger>
+          <TabsTrigger value="url" className="w-full justify-start text-base p-3">URL Scanner</TabsTrigger>
+          <TabsTrigger value="file" className="w-full justify-start text-base p-3">File Analyzer</TabsTrigger>
+          <TabsTrigger value="network" className="w-full justify-start text-base p-3">Network Anomaly</TabsTrigger>
+          <TabsTrigger value="fraud" className="w-full justify-start text-base p-3">Fraud Detection</TabsTrigger>
+          <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">Correlation</TabsTrigger>
         </TabsList>
+      </div>
 
+      <div className="col-span-1 md:col-span-3">
         <TabsContent value="email">
           <Card>
             <CardHeader>
@@ -511,28 +514,30 @@ export function AnalysisClient() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
 
-      <div className="space-y-4">
-        <Button onClick={currentFormSubmit()} disabled={loading} className="w-full">
-          {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-          Analyze with AI Agent
-        </Button>
-        <Card className={`transition-opacity duration-300 ${result || loading ? 'opacity-100' : 'opacity-0'}`}>
-          <CardHeader>
-            <CardTitle>{loading ? 'Analyzing...' : result?.title || 'Agent Output'}</CardTitle>
-            <CardDescription>The agent's findings will appear here.</CardDescription>
-          </CardHeader>
-          <CardContent className="min-h-[200px] text-sm">
-            {loading && (
-              <div className="flex justify-center items-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            )}
-            {result && <div>{result.content}</div>}
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Button onClick={currentFormSubmit()} disabled={loading} className="w-full">
+            {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Analyze with AI Agent
+          </Button>
+          <Card className={`transition-opacity duration-300 ${result || loading ? 'opacity-100' : 'opacity-0'}`}>
+            <CardHeader>
+              <CardTitle>{loading ? 'Analyzing...' : result?.title || 'Agent Output'}</CardTitle>
+              <CardDescription>The agent's findings will appear here.</CardDescription>
+            </CardHeader>
+            <CardContent className="min-h-[200px] text-sm">
+              {loading && (
+                <div className="flex justify-center items-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              {result && <div>{result.content}</div>}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </Tabs>
   );
 }
+
+    
