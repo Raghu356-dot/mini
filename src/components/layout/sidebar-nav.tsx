@@ -42,12 +42,12 @@ export function SidebarNav() {
         <SidebarMenu>
           {navItems.map(item => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton isActive={pathname === item.href} tooltip={item.label}>
+              <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
+                <Link href={item.href}>
                   <item.icon />
                   <span>{item.label}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -68,14 +68,14 @@ export function SidebarNav() {
             </div>
           )}
         </div>
-        <Link href="/login" passHref legacyBehavior>
-          <SidebarMenuButton asChild>
+        <SidebarMenuButton asChild>
+          <Link href="/login">
             <Button variant="ghost" className="w-full justify-start">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </Button>
-          </SidebarMenuButton>
-        </Link>
+          </Link>
+        </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
   );
