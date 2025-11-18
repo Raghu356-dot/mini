@@ -2,8 +2,7 @@
 import {usePathname} from 'next/navigation';
 import {SidebarTrigger} from '@/components/ui/sidebar';
 import {Button} from '@/components/ui/button';
-import {Bell, Search} from 'lucide-react';
-import {Input} from '@/components/ui/input';
+import {Bell} from 'lucide-react';
 
 const pageTitles: {[key: string]: string} = {
   '/analysis': 'Threat Analysis',
@@ -21,10 +20,6 @@ export function Header() {
         <h1 className="text-xl font-semibold md:text-2xl">{title}</h1>
       </div>
       <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
-        <div className="relative hidden flex-1 max-w-sm md:block">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search threats..." className="pl-8" />
-        </div>
         <Button variant="ghost" size="icon" className="rounded-full">
           <Bell className="h-5 w-5" />
           <span className="sr-only">Notifications</span>
