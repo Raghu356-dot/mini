@@ -17,7 +17,7 @@ import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
 import {correlateEvents} from '@/ai/flows/correlate-events';
 import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
-import {Loader2, Sparkles, ShieldCheck} from 'lucide-react';
+import {Loader2, Sparkles, ShieldCheck, AlertTriangle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -278,6 +278,30 @@ export function AnalysisClient() {
         response.isFraudulent ? 'Fraudulent' : 'Not Fraudulent'
       }, Risk - ${response.riskScore}%. Reason: ${response.reason}`;
       addEvent('Fraud Detection', eventDescription);
+
+      if (response.isFraudulent) {
+        toast({
+          variant: 'destructive',
+          title: (
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-white" />
+              <span className="font-bold">Potential Fraud Detected</span>
+            </div>
+          ),
+          description: `Activity with risk score ${response.riskScore}% was flagged. ${response.suggestedAction}`,
+        });
+      } else {
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="text-green-500" />
+              <span className="font-bold">Activity Clear</span>
+            </div>
+          ),
+          description: `The analyzed activity appears to be legitimate (Risk: ${response.riskScore}%).`,
+        });
+      }
+
       setResult({
         title: 'Fraud Detection Agent Response',
         content: (
