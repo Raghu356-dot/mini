@@ -366,270 +366,274 @@ export function AnalysisClient() {
   };
 
   return (
-    <Tabs
-      defaultValue="email"
-      orientation="vertical"
-      className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start"
-      onValueChange={id => {
-        setActiveTab(id);
-        setResult(null);
-      }}
-    >
-      <div className="col-span-1">
-        <TabsList className="flex flex-col h-full w-full bg-transparent p-0">
-          <TabsTrigger value="email" className="w-full justify-start text-base p-3">
-            Email Analyzer
-          </TabsTrigger>
-          <TabsTrigger value="url" className="w-full justify-start text-base p-3">
-            URL Scanner
-          </TabsTrigger>
-          <TabsTrigger value="file" className="w-full justify-start text-base p-3">
-            File Analyzer
-          </TabsTrigger>
-          <TabsTrigger value="network" className="w-full justify-start text-base p-3">
-            Network Anomaly
-          </TabsTrigger>
-          <TabsTrigger value="fraud" className="w-full justify-start text-base p-3">
-            Fraud Detection
-          </TabsTrigger>
-          <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">
-            Correlation
-          </TabsTrigger>
-        </TabsList>
-      </div>
-
-      <div className="col-span-1 md:col-span-3">
-        <div className="space-y-4">
-          <TabsContent value="email">
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Analyzer Agent</CardTitle>
-                <CardDescription>Analyze email content for phishing attempts.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...emailForm}>
-                  <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-4">
-                    <FormField
-                      control={emailForm.control}
-                      name="content"
-                      render={({field}) => (
-                        <FormItem>
-                          <FormLabel>Email Content</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Paste email body here..." {...field} rows={6} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="url">
-            <Card>
-              <CardHeader>
-                <CardTitle>URL Scanner Agent</CardTitle>
-                <CardDescription>Scan URLs for malicious links.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...urlForm}>
-                  <form onSubmit={urlForm.handleSubmit(handleUrlSubmit)} className="space-y-4">
-                    <FormField
-                      control={urlForm.control}
-                      name="url"
-                      render={({field}) => (
-                        <FormItem>
-                          <FormLabel>URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="file">
-            <Card>
-              <CardHeader>
-                <CardTitle>Malware File Analyzer</CardTitle>
-                <CardDescription>Upload a file to analyze its contents for malware.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...fileForm}>
-                  <form onSubmit={fileForm.handleSubmit(handleFileSubmit)} className="space-y-4">
-                    <FormField
-                      control={fileForm.control}
-                      name="file"
-                      render={({field}) => (
-                        <FormItem>
-                          <FormLabel>File</FormLabel>
-                          <FormControl>
-                            <Input type="file" onChange={e => field.onChange(e.target.files)} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="network">
-            <Card>
-              <CardHeader>
-                <CardTitle>Network Anomaly Agent</CardTitle>
-                <CardDescription>Analyze network logs for intrusions.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...networkForm}>
-                  <form onSubmit={networkForm.handleSubmit(handleNetworkSubmit)} className="space-y-4">
-                    <FormField
-                      control={networkForm.control}
-                      name="logs"
-                      render={({field}) => (
-                        <FormItem>
-                          <FormLabel>Network Logs</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Paste network logs here..." {...field} rows={8} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="fraud">
-            <Card>
-              <CardHeader>
-                <CardTitle>Fraud Detection Agent</CardTitle>
-                <CardDescription>Analyze user activity for potential fraud.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...fraudForm}>
-                  <form onSubmit={fraudForm.handleSubmit(handleFraudSubmit)} className="space-y-4">
-                    <FormField
-                      control={fraudForm.control}
-                      name="activityDetails"
-                      render={({field}) => (
-                        <FormItem>
-                          <FormLabel>Activity Details</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Describe the user activity..." {...field} rows={6} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="correlation">
-            <Card>
-              <CardHeader>
-                <CardTitle>Correlation Agent</CardTitle>
-                <CardDescription>Select events from other agents to find connections.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...correlationForm}>
-                  <form
-                    onSubmit={e => {
-                      e.preventDefault();
-                      handleCorrelationSubmit();
-                    }}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={correlationForm.control}
-                      name="selectedEvents"
-                      render={() => (
-                        <FormItem>
-                          <div className="mb-4">
-                            <FormLabel className="text-base">Logged Events</FormLabel>
-                            <p className="text-sm text-muted-foreground">Select at least two events to correlate.</p>
-                          </div>
-                          <div className="space-y-2 h-64 overflow-y-auto border p-2 rounded-md">
-                            {loggedEvents.length === 0 && (
-                              <p className="text-muted-foreground text-sm text-center py-4">
-                                No events logged yet. Run other agents to generate events.
-                              </p>
-                            )}
-                            {loggedEvents.map(event => (
-                              <FormField
-                                key={event.id}
-                                control={correlationForm.control}
-                                name="selectedEvents"
-                                render={() => {
-                                  return (
-                                    <FormItem
-                                      key={event.id}
-                                      className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-accent hover:text-accent-foreground transition-colors"
-                                    >
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={correlationForm.getValues('selectedEvents').includes(event.description)}
-                                          onCheckedChange={() => handleEventSelectionChange(event.description)}
-                                        />
-                                      </FormControl>
-                                      <div className="space-y-1 leading-none">
-                                        <FormLabel className="font-normal">{event.description}</FormLabel>
-                                        <p className="text-xs text-muted-foreground">
-                                          {event.agent} - {new Date(event.timestamp).toLocaleTimeString()}
-                                        </p>
-                                      </div>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            ))}
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <Button onClick={currentFormSubmit()} disabled={loading} className="w-full">
-            {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Analyze with AI Agent
-          </Button>
-
-          <Card className={`transition-opacity duration-300 ${result || loading ? 'opacity-100' : 'opacity-0'}`}>
-            <CardHeader>
-              <CardTitle>{loading ? 'Analyzing...' : result?.title || 'Agent Output'}</CardTitle>
-              <CardDescription>The agent's findings will appear here.</CardDescription>
-            </CardHeader>
-            <CardContent className="min-h-[200px] text-sm">
-              {loading && (
-                <div className="flex justify-center items-center h-full">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+        <Tabs
+            defaultValue="email"
+            orientation="vertical"
+            className="col-span-1 md:col-span-4"
+            onValueChange={id => {
+                setActiveTab(id);
+                setResult(null);
+            }}
+        >
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+                <div className="col-span-1">
+                    <TabsList className="flex flex-col h-full w-full bg-transparent p-0">
+                        <TabsTrigger value="email" className="w-full justify-start text-base p-3">
+                            Email Analyzer
+                        </TabsTrigger>
+                        <TabsTrigger value="url" className="w-full justify-start text-base p-3">
+                            URL Scanner
+                        </TabsTrigger>
+                        <TabsTrigger value="file" className="w-full justify-start text-base p-3">
+                            File Analyzer
+                        </TabsTrigger>
+                        <TabsTrigger value="network" className="w-full justify-start text-base p-3">
+                            Network Anomaly
+                        </TabsTrigger>
+                        <TabsTrigger value="fraud" className="w-full justify-start text-base p-3">
+                            Fraud Detection
+                        </TabsTrigger>
+                        <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">
+                            Correlation
+                        </TabsTrigger>
+                    </TabsList>
                 </div>
-              )}
-              {result && <div>{result.content}</div>}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </Tabs>
+
+                <div className="col-span-1 md:col-span-3">
+                    <div className="space-y-4">
+                        <TabsContent value="email">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Email Analyzer Agent</CardTitle>
+                                    <CardDescription>Analyze email content for phishing attempts.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...emailForm}>
+                                        <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={emailForm.control}
+                                                name="content"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>Email Content</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="Paste email body here..." {...field} rows={6} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="url">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>URL Scanner Agent</CardTitle>
+                                    <CardDescription>Scan URLs for malicious links.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...urlForm}>
+                                        <form onSubmit={urlForm.handleSubmit(handleUrlSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={urlForm.control}
+                                                name="url"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>URL</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="https://example.com" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="file">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Malware File Analyzer</CardTitle>
+                                    <CardDescription>Upload a file to analyze its contents for malware.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...fileForm}>
+                                        <form onSubmit={fileForm.handleSubmit(handleFileSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={fileForm.control}
+                                                name="file"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>File</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="file" onChange={e => field.onChange(e.target.files)} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="network">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Network Anomaly Agent</CardTitle>
+                                    <CardDescription>Analyze network logs for intrusions.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...networkForm}>
+                                        <form onSubmit={networkForm.handleSubmit(handleNetworkSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={networkForm.control}
+                                                name="logs"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>Network Logs</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="Paste network logs here..." {...field} rows={8} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="fraud">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Fraud Detection Agent</CardTitle>
+                                    <CardDescription>Analyze user activity for potential fraud.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...fraudForm}>
+                                        <form onSubmit={fraudForm.handleSubmit(handleFraudSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={fraudForm.control}
+                                                name="activityDetails"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>Activity Details</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="Describe the user activity..." {...field} rows={6} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="correlation">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Correlation Agent</CardTitle>
+                                    <CardDescription>Select events from other agents to find connections.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Form {...correlationForm}>
+                                        <form
+                                            onSubmit={e => {
+                                                e.preventDefault();
+                                                handleCorrelationSubmit();
+                                            }}
+                                            className="space-y-4"
+                                        >
+                                            <FormField
+                                                control={correlationForm.control}
+                                                name="selectedEvents"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <div className="mb-4">
+                                                            <FormLabel className="text-base">Logged Events</FormLabel>
+                                                            <p className="text-sm text-muted-foreground">Select at least two events to correlate.</p>
+                                                        </div>
+                                                        <div className="space-y-2 h-64 overflow-y-auto border p-2 rounded-md">
+                                                            {loggedEvents.length === 0 && (
+                                                                <p className="text-muted-foreground text-sm text-center py-4">
+                                                                    No events logged yet. Run other agents to generate events.
+                                                                </p>
+                                                            )}
+                                                            {loggedEvents.map(event => (
+                                                                <FormField
+                                                                    key={event.id}
+                                                                    control={correlationForm.control}
+                                                                    name="selectedEvents"
+                                                                    render={() => {
+                                                                        return (
+                                                                            <FormItem
+                                                                                key={event.id}
+                                                                                className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-accent hover:text-accent-foreground transition-colors"
+                                                                            >
+                                                                                <FormControl>
+                                                                                    <Checkbox
+                                                                                        checked={correlationForm.getValues('selectedEvents').includes(event.description)}
+                                                                                        onCheckedChange={() => handleEventSelectionChange(event.description)}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <div className="space-y-1 leading-none">
+                                                                                    <FormLabel className="font-normal">{event.description}</FormLabel>
+                                                                                    <p className="text-xs text-muted-foreground">
+                                                                                        {event.agent} - {new Date(event.timestamp).toLocaleTimeString()}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </FormItem>
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <Button onClick={currentFormSubmit()} disabled={loading} className="w-full">
+                            {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                            Analyze with AI Agent
+                        </Button>
+
+                        <Card className={`transition-opacity duration-300 ${result || loading ? 'opacity-100' : 'opacity-0'}`}>
+                            <CardHeader>
+                                <CardTitle>{loading ? 'Analyzing...' : result?.title || 'Agent Output'}</CardTitle>
+                                <CardDescription>The agent's findings will appear here.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="min-h-[200px] text-sm">
+                                {loading && (
+                                    <div className="flex justify-center items-center h-full">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    </div>
+                                )}
+                                {result && <div>{result.content}</div>}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </Tabs>
+    </div>
   );
 }
