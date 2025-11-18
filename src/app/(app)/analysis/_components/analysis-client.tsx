@@ -10,20 +10,19 @@ import {Button} from '@/components/ui/button';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
 import {summarizeNetworkLogs} from '@/ai/flows/summarize-network-logs';
 import {analyzeFile} from '@/ai/flows/analyze-file';
 import {detectFraud} from '@/ai/flows/detect-fraud';
+import {analyzeEmail} from '@/ai/flows/analyze-email';
+import {scanUrl} from '@/ai/flows/scan-url';
 import {Loader2, Sparkles} from 'lucide-react';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
-  riskScore: z.coerce.number().min(0).max(100).default(92),
 });
 
 const urlSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
-  riskScore: z.coerce.number().min(0).max(100).default(88),
 });
 
 const MAX_FILE_SIZE = 5000000; // 5MB
@@ -57,7 +56,6 @@ export function AnalysisClient() {
     defaultValues: {
       content:
         'Urgent! Verify your bank account or your service will be suspended. Click: http://fake-bank-login.com/secure',
-      riskScore: 92,
     },
   });
 
@@ -65,7 +63,6 @@ export function AnalysisClient() {
     resolver: zodResolver(urlSchema),
     defaultValues: {
       url: 'http://fake-bank-login.com/secure',
-      riskScore: 88,
     },
   });
 
@@ -91,24 +88,23 @@ export function AnalysisClient() {
     setLoading(true);
     setResult(null);
     try {
-      const response = await suggestResponseActions({
-        threatType: 'Phishing Email',
-        riskScore: values.riskScore,
-        details: values.content,
-      });
+      const response = await analyzeEmail({emailContent: values.content});
       setResult({
         title: 'Email Analyzer Agent Response',
         content: (
-          <ul className="list-disc pl-5 space-y-1 text-sm">
-            {response.suggestedActions.map((action, i) => (
-              <li key={i}>{action}</li>
-            ))}
-          </ul>
+          <div className="space-y-2 text-sm">
+            <p>
+              <span className="font-semibold">Verdict:</span> {response.verdict}
+            </p>
+            <p>
+              <span className="font-semibold">Analysis:</span> {response.analysis}
+            </p>
+          </div>
         ),
       });
     } catch (error) {
       console.error(error);
-      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+      setResult({title: 'Error', content: <p>Failed to get analysis from the AI agent.</p>});
     }
     setLoading(false);
   };
@@ -117,24 +113,23 @@ export function AnalysisClient() {
     setLoading(true);
     setResult(null);
     try {
-      const response = await suggestResponseActions({
-        threatType: 'Suspicious URL',
-        riskScore: values.riskScore,
-        details: values.url,
-      });
+      const response = await scanUrl({url: values.url});
       setResult({
         title: 'URL Scanner Agent Response',
         content: (
-          <ul className="list-disc pl-5 space-y-1 text-sm">
-            {response.suggestedActions.map((action, i) => (
-              <li key={i}>{action}</li>
-            ))}
-          </ul>
+          <div className="space-y-2 text-sm">
+            <p>
+              <span className="font-semibold">Verdict:</span> {response.verdict}
+            </p>
+            <p>
+              <span className="font-semibold">Analysis:</span> {response.analysis}
+            </p>
+          </div>
         ),
       });
     } catch (error) {
       console.error(error);
-      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+      setResult({title: 'Error', content: <p>Failed to get analysis from the AI agent.</p>});
     }
     setLoading(false);
   };
@@ -290,19 +285,6 @@ export function AnalysisClient() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={emailForm.control}
-                    name="riskScore"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Simulated Risk Score</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </form>
               </Form>
             </CardContent>
@@ -326,19 +308,6 @@ export function AnalysisClient() {
                         <FormLabel>URL</FormLabel>
                         <FormControl>
                           <Input placeholder="https://example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={urlForm.control}
-                    name="riskScore"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Simulated Risk Score</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
