@@ -16,9 +16,12 @@ import {detectFraud} from '@/ai/flows/detect-fraud';
 import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
 import {correlateEvents} from '@/ai/flows/correlate-events';
+import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
 import {Loader2, Sparkles} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {Checkbox} from '@/components/ui/checkbox';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Slider} from '@/components/ui/slider';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
@@ -46,6 +49,12 @@ const fraudSchema = z.object({
 
 const correlationSchema = z.object({
   selectedEvents: z.array(z.string()).min(2, 'Please select at least two events to correlate.'),
+});
+
+const incidentResponseSchema = z.object({
+  threatType: z.string().min(1, 'Please select a threat type.'),
+  riskScore: z.number().min(0).max(100),
+  details: z.string().min(10, 'Please provide threat details.'),
 });
 
 type AnalysisResult = {
@@ -126,6 +135,15 @@ export function AnalysisClient() {
     resolver: zodResolver(correlationSchema),
     defaultValues: {
       selectedEvents: [],
+    },
+  });
+
+  const incidentResponseForm = useForm<z.infer<typeof incidentResponseSchema>>({
+    resolver: zodResolver(incidentResponseSchema),
+    defaultValues: {
+      threatType: 'Phishing',
+      riskScore: 90,
+      details: 'Malicious link detected in an email from suspicious domain.',
     },
   });
 
@@ -347,6 +365,31 @@ export function AnalysisClient() {
     setLoading(false);
   };
 
+  const handleIncidentResponseSubmit = async (values: z.infer<typeof incidentResponseSchema>) => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const response = await suggestResponseActions(values);
+      setResult({
+        title: 'Incident Response Agent Suggestions',
+        content: (
+          <div className="text-sm space-y-2">
+            <p className="font-semibold">Based on the threat details, here are the suggested actions:</p>
+            <ul className="list-disc list-inside space-y-1 pl-2">
+              {response.suggestedActions.map((action, index) => (
+                <li key={index}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+    }
+    setLoading(false);
+  };
+
   const currentFormSubmit = () => {
     switch (activeTab) {
       case 'email':
@@ -361,6 +404,8 @@ export function AnalysisClient() {
         return fraudForm.handleSubmit(handleFraudSubmit);
       case 'correlation':
         return handleCorrelationSubmit;
+      case 'incident-response':
+        return incidentResponseForm.handleSubmit(handleIncidentResponseSubmit);
       default:
         return () => {};
     }
@@ -404,6 +449,9 @@ export function AnalysisClient() {
           </TabsTrigger>
           <TabsTrigger value="correlation" className="w-full justify-start text-base p-3">
             Correlation
+          </TabsTrigger>
+          <TabsTrigger value="incident-response" className="w-full justify-start text-base p-3">
+            Incident Response
           </TabsTrigger>
         </TabsList>
       </div>
@@ -557,10 +605,13 @@ export function AnalysisClient() {
             </CardHeader>
             <CardContent>
               <Form {...correlationForm}>
-                <form onSubmit={e => {
-                  e.preventDefault();
-                  handleCorrelationSubmit();
-                }} className="space-y-4">
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleCorrelationSubmit();
+                  }}
+                  className="space-y-4"
+                >
                   <FormField
                     control={correlationForm.control}
                     name="selectedEvents"
@@ -605,6 +656,84 @@ export function AnalysisClient() {
                             />
                           ))}
                         </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="incident-response">
+          <Card>
+            <CardHeader>
+              <CardTitle>Automated Incident Response</CardTitle>
+              <CardDescription>
+                Get automated response suggestions for a confirmed threat.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...incidentResponseForm}>
+                <form
+                  onSubmit={incidentResponseForm.handleSubmit(handleIncidentResponseSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={incidentResponseForm.control}
+                    name="threatType"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Threat Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a threat type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Phishing">Phishing</SelectItem>
+                            <SelectItem value="Malware">Malware</SelectItem>
+                            <SelectItem value="Intrusion">Intrusion</SelectItem>
+                            <SelectItem value="Fraud">Fraud</SelectItem>
+                            <SelectItem value="Port Scan">Port Scan</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={incidentResponseForm.control}
+                    name="riskScore"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>
+                          Risk Score: <span className="font-bold">{field.value}</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Slider
+                            min={0}
+                            max={100}
+                            step={1}
+                            onValueChange={value => field.onChange(value[0])}
+                            defaultValue={[field.value]}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={incidentResponseForm.control}
+                    name="details"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Threat Details</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Provide details of the threat..." {...field} rows={4} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
