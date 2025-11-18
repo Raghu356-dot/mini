@@ -14,9 +14,19 @@ import {suggestResponseActions} from '@/ai/flows/suggest-response-actions';
 import {summarizeNetworkLogs} from '@/ai/flows/summarize-network-logs';
 import {Loader2, Sparkles} from 'lucide-react';
 
-const phishingSchema = z.object({
-  content: z.string().min(10, 'Please enter email content or a URL.'),
+const emailSchema = z.object({
+  content: z.string().min(10, 'Please enter email content.'),
   riskScore: z.coerce.number().min(0).max(100).default(92),
+});
+
+const urlSchema = z.object({
+  url: z.string().url('Please enter a valid URL.'),
+  riskScore: z.coerce.number().min(0).max(100).default(88),
+});
+
+const fileSchema = z.object({
+  metadata: z.string().min(10, 'Please enter file metadata.'),
+  riskScore: z.coerce.number().min(0).max(100).default(99),
 });
 
 const networkSchema = z.object({
@@ -36,15 +46,32 @@ type AnalysisResult = {
 };
 
 export function AnalysisClient() {
-  const [activeTab, setActiveTab] = useState('phishing');
+  const [activeTab, setActiveTab] = useState('email');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
-  const phishingForm = useForm<z.infer<typeof phishingSchema>>({
-    resolver: zodResolver(phishingSchema),
+  const emailForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
     defaultValues: {
-      content: 'Urgent! Verify your bank account or your service will be suspended. Click: http://fake-bank-login.com/secure',
+      content:
+        'Urgent! Verify your bank account or your service will be suspended. Click: http://fake-bank-login.com/secure',
       riskScore: 92,
+    },
+  });
+
+  const urlForm = useForm<z.infer<typeof urlSchema>>({
+    resolver: zodResolver(urlSchema),
+    defaultValues: {
+      url: 'http://fake-bank-login.com/secure',
+      riskScore: 88,
+    },
+  });
+
+  const fileForm = useForm<z.infer<typeof fileSchema>>({
+    resolver: zodResolver(fileSchema),
+    defaultValues: {
+      metadata: 'File: invoice.zip, Size: 1.2MB, Hash: 5d8c3e...',
+      riskScore: 99,
     },
   });
 
@@ -60,18 +87,69 @@ export function AnalysisClient() {
     defaultValues: {userId: '1058', location: 'Russia', device: 'Unknown', time: '3 AM'},
   });
 
-  const handlePhishingSubmit = async (values: z.infer<typeof phishingSchema>) => {
+  const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     setLoading(true);
     setResult(null);
     try {
-      const isUrl = values.content.startsWith('http');
       const response = await suggestResponseActions({
-        threatType: isUrl ? 'Suspicious URL' : 'Phishing Email',
+        threatType: 'Phishing Email',
         riskScore: values.riskScore,
         details: values.content,
       });
       setResult({
-        title: 'Phishing/Malware Agent Response',
+        title: 'Email Analyzer Agent Response',
+        content: (
+          <ul className="list-disc pl-5 space-y-1 text-sm">
+            {response.suggestedActions.map((action, i) => (
+              <li key={i}>{action}</li>
+            ))}
+          </ul>
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+    }
+    setLoading(false);
+  };
+
+  const handleUrlSubmit = async (values: z.infer<typeof urlSchema>) => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const response = await suggestResponseActions({
+        threatType: 'Suspicious URL',
+        riskScore: values.riskScore,
+        details: values.url,
+      });
+      setResult({
+        title: 'URL Scanner Agent Response',
+        content: (
+          <ul className="list-disc pl-5 space-y-1 text-sm">
+            {response.suggestedActions.map((action, i) => (
+              <li key={i}>{action}</li>
+            ))}
+          </ul>
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+      setResult({title: 'Error', content: <p>Failed to get suggestions from the AI agent.</p>});
+    }
+    setLoading(false);
+  };
+
+  const handleFileSubmit = async (values: z.infer<typeof fileSchema>) => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const response = await suggestResponseActions({
+        threatType: 'Malware File',
+        riskScore: values.riskScore,
+        details: values.metadata,
+      });
+      setResult({
+        title: 'Malware File Analyzer Response',
         content: (
           <ul className="list-disc pl-5 space-y-1 text-sm">
             {response.suggestedActions.map((action, i) => (
@@ -131,52 +209,145 @@ export function AnalysisClient() {
 
   const currentFormSubmit = () => {
     switch (activeTab) {
-        case 'phishing': return phishingForm.handleSubmit(handlePhishingSubmit);
-        case 'network': return networkForm.handleSubmit(handleNetworkSubmit);
-        case 'fraud': return fraudForm.handleSubmit(handleFraudSubmit);
-        default: return () => {};
+      case 'email':
+        return emailForm.handleSubmit(handleEmailSubmit);
+      case 'url':
+        return urlForm.handleSubmit(handleUrlSubmit);
+      case 'file':
+        return fileForm.handleSubmit(handleFileSubmit);
+      case 'network':
+        return networkForm.handleSubmit(handleNetworkSubmit);
+      case 'fraud':
+        return fraudForm.handleSubmit(handleFraudSubmit);
+      default:
+        return () => {};
     }
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <Tabs
-        defaultValue="phishing"
+        defaultValue="email"
         className="w-full"
         onValueChange={id => {
           setActiveTab(id);
           setResult(null);
         }}
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="phishing">Phishing & Malware</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="email">Email Analyzer</TabsTrigger>
+          <TabsTrigger value="url">URL Scanner</TabsTrigger>
+          <TabsTrigger value="file">File Analyzer</TabsTrigger>
           <TabsTrigger value="network">Network Anomaly</TabsTrigger>
           <TabsTrigger value="fraud">Fraud Detection</TabsTrigger>
         </TabsList>
-        <TabsContent value="phishing">
+
+        <TabsContent value="email">
           <Card>
             <CardHeader>
-              <CardTitle>Phishing & Malware Agent</CardTitle>
-              <CardDescription>Analyze emails, URLs, and file metadata.</CardDescription>
+              <CardTitle>Email Analyzer Agent</CardTitle>
+              <CardDescription>Analyze email content for phishing attempts.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...phishingForm}>
-                <form onSubmit={phishingForm.handleSubmit(handlePhishingSubmit)} className="space-y-4">
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-4">
                   <FormField
-                    control={phishingForm.control}
+                    control={emailForm.control}
                     name="content"
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>Email Content / URL</FormLabel>
+                        <FormLabel>Email Content</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Paste email body or URL..." {...field} rows={6} />
+                          <Textarea placeholder="Paste email body here..." {...field} rows={6} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
-                    control={phishingForm.control}
+                    control={emailForm.control}
+                    name="riskScore"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Simulated Risk Score</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="url">
+          <Card>
+            <CardHeader>
+              <CardTitle>URL Scanner Agent</CardTitle>
+              <CardDescription>Scan URLs for malicious links.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...urlForm}>
+                <form onSubmit={urlForm.handleSubmit(handleUrlSubmit)} className="space-y-4">
+                  <FormField
+                    control={urlForm.control}
+                    name="url"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={urlForm.control}
+                    name="riskScore"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Simulated Risk Score</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="file">
+          <Card>
+            <CardHeader>
+              <CardTitle>Malware File Analyzer</CardTitle>
+              <CardDescription>Analyze file metadata for malware signatures.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...fileForm}>
+                <form onSubmit={fileForm.handleSubmit(handleFileSubmit)} className="space-y-4">
+                  <FormField
+                    control={fileForm.control}
+                    name="metadata"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>File Metadata</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Paste file metadata here..." {...field} rows={6} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={fileForm.control}
                     name="riskScore"
                     render={({field}) => (
                       <FormItem>
@@ -292,8 +463,8 @@ export function AnalysisClient() {
 
       <div className="space-y-4">
         <Button onClick={currentFormSubmit()} disabled={loading} className="w-full">
-            {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Analyze with AI Agent
+          {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+          Analyze with AI Agent
         </Button>
         <Card className={`transition-opacity duration-300 ${result || loading ? 'opacity-100' : 'opacity-0'}`}>
           <CardHeader>
@@ -313,3 +484,5 @@ export function AnalysisClient() {
     </div>
   );
 }
+
+    
