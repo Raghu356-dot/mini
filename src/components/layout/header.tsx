@@ -3,6 +3,7 @@ import {usePathname} from 'next/navigation';
 import {SidebarTrigger} from '@/components/ui/sidebar';
 
 const pageTitles: {[key: string]: string} = {
+  '/dashboard': 'Dashboard',
   '/analysis': 'Threat Analysis',
   '/settings': 'Settings',
   '/history': 'History',

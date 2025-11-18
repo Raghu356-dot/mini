@@ -11,9 +11,10 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import {BrainCircuit, History} from 'lucide-react';
+import {BrainCircuit, History, LayoutDashboard} from 'lucide-react';
 
 const navItems = [
+  {href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard'},
   {href: '/analysis', icon: BrainCircuit, label: 'Threat Analysis'},
   {href: '/history', icon: History, label: 'History'},
 ];
