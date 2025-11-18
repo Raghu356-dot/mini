@@ -16,6 +16,7 @@ import {detectFraud} from '@/ai/flows/detect-fraud';
 import {analyzeEmail} from '@/ai/flows/analyze-email';
 import {scanUrl} from '@/ai/flows/scan-url';
 import {Loader2, Sparkles} from 'lucide-react';
+import {cn} from '@/lib/utils';
 
 const emailSchema = z.object({
   content: z.string().min(10, 'Please enter email content.'),
@@ -44,6 +45,18 @@ const fraudSchema = z.object({
 type AnalysisResult = {
   title: string;
   content: React.ReactNode;
+};
+
+const Verdict = ({verdict}: {verdict: 'Malicious' | 'Suspicious' | 'Benign' | string}) => {
+  const verdictColor =
+    verdict === 'Malicious'
+      ? 'text-destructive'
+      : verdict === 'Suspicious'
+        ? 'text-yellow-500'
+        : verdict === 'Benign'
+          ? 'text-green-500'
+          : '';
+  return <span className={cn('font-bold', verdictColor)}>{verdict}</span>;
 };
 
 export function AnalysisClient() {
@@ -94,7 +107,7 @@ export function AnalysisClient() {
         content: (
           <div className="space-y-2 text-sm">
             <p>
-              <span className="font-semibold">Verdict:</span> {response.verdict}
+              <span className="font-semibold">Verdict:</span> <Verdict verdict={response.verdict} />
             </p>
             <p>
               <span className="font-semibold">Analysis:</span> {response.analysis}
@@ -119,7 +132,7 @@ export function AnalysisClient() {
         content: (
           <div className="space-y-2 text-sm">
             <p>
-              <span className="font-semibold">Verdict:</span> {response.verdict}
+              <span className="font-semibold">Verdict:</span> <Verdict verdict={response.verdict} />
             </p>
             <p>
               <span className="font-semibold">Analysis:</span> {response.analysis}
@@ -153,7 +166,7 @@ export function AnalysisClient() {
             content: (
               <div className="space-y-2 text-sm">
                 <p>
-                  <span className="font-semibold">Verdict:</span> {response.verdict}
+                  <span className="font-semibold">Verdict:</span> <Verdict verdict={response.verdict} />
                 </p>
                 <p>
                   <span className="font-semibold">Analysis:</span> {response.analysis}
@@ -207,10 +220,29 @@ export function AnalysisClient() {
           <div className="text-sm space-y-2">
             <p>
               <span className="font-semibold">Verdict:</span>{' '}
-              {response.isFraudulent ? 'Potential Fraud Detected' : 'No Fraud Detected'}
+              <span
+                className={cn(
+                  'font-bold',
+                  response.isFraudulent ? 'text-destructive' : 'text-green-500'
+                )}
+              >
+                {response.isFraudulent ? 'Potential Fraud Detected' : 'No Fraud Detected'}
+              </span>
             </p>
             <p>
-              <span className="font-semibold">Risk Score:</span> {response.riskScore}%
+              <span className="font-semibold">Risk Score:</span>{' '}
+              <span
+                className={cn(
+                  'font-bold',
+                  response.riskScore > 80
+                    ? 'text-destructive'
+                    : response.riskScore > 60
+                      ? 'text-yellow-500'
+                      : 'text-green-500'
+                )}
+              >
+                {response.riskScore}%
+              </span>
             </p>
             <p>
               <span className="font-semibold">Reason:</span> {response.reason}
