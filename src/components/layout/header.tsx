@@ -4,14 +4,13 @@ import {usePathname} from 'next/navigation';
 import {SidebarTrigger} from '@/components/ui/sidebar';
 
 const pageTitles: {[key: string]: string} = {
-  '/dashboard': 'Dashboard',
   '/analysis': 'Threat Analysis',
   '/history': 'History',
 };
 
 export function Header() {
   const pathname = usePathname();
-  const title = pageTitles[pathname] || 'Dashboard';
+  const title = pageTitles[pathname] || 'Analysis';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 md:px-8">
