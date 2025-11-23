@@ -6,7 +6,6 @@ const pageTitles: {[key: string]: string} = {
   '/analysis': 'Threat Analysis',
   '/settings': 'Settings',
   '/history': 'History',
-  '/methodology': 'Methodology',
 };
 
 export function Header() {

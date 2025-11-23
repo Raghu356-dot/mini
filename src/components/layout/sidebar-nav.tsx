@@ -12,12 +12,11 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import {BrainCircuit, History, GitMerge} from 'lucide-react';
+import {BrainCircuit, History} from 'lucide-react';
 
 const navItems = [
   {href: '/analysis', icon: BrainCircuit, label: 'Threat Analysis'},
   {href: '/history', icon: History, label: 'History'},
-  {href: '/methodology', icon: GitMerge, label: 'Methodology'},
 ];
 
 export function SidebarNav() {
