@@ -43,5 +43,3 @@ export function SidebarNav() {
     </Sidebar>
   );
 }
-
-    

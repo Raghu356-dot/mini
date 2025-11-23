@@ -637,5 +637,3 @@ export function AnalysisClient() {
     </div>
   );
 }
-
-    
