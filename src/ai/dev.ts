@@ -1,3 +1,4 @@
+'use server';
 import { config } from 'dotenv';
 config();
 
@@ -8,3 +9,4 @@ import '@/ai/flows/detect-fraud.ts';
 import '@/ai/flows/analyze-email.ts';
 import '@/ai/flows/scan-url.ts';
 import '@/ai/flows/correlate-events.ts';
+import '@/ai/flows/suggest-response-actions.ts';
