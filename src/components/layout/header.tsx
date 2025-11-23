@@ -1,3 +1,4 @@
+
 'use client';
 import {usePathname} from 'next/navigation';
 import {SidebarTrigger} from '@/components/ui/sidebar';
@@ -22,3 +23,5 @@ export function Header() {
     </header>
   );
 }
+
+    

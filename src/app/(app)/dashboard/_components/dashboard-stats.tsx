@@ -1,3 +1,4 @@
+
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {AlertTriangle, CheckCircle2, Bot, ShieldAlert} from 'lucide-react';
 import {mockThreats} from '@/lib/data';
@@ -53,3 +54,5 @@ export function DashboardStats() {
     </div>
   );
 }
+
+    

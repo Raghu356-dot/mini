@@ -1,3 +1,4 @@
+
 import {DashboardStats} from './_components/dashboard-stats';
 import {RecentThreatsTable} from './_components/recent-threats-table';
 import {RiskOverTimeChart} from './_components/risk-over-time-chart';
@@ -19,3 +20,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

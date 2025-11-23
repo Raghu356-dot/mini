@@ -1,3 +1,4 @@
+
 import {AnalysisClient} from './_components/analysis-client';
 
 export default function AnalysisPage() {
@@ -14,3 +15,5 @@ export default function AnalysisPage() {
     </div>
   );
 }
+
+    
