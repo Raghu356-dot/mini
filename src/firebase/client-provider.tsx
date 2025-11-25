@@ -8,6 +8,7 @@ import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { firebaseConfig } from './config';
+import { UserProvider } from './auth/use-user';
 
 type Props = {
   children: ReactNode;
@@ -25,7 +26,7 @@ export function FirebaseClientProvider({ children }: Props) {
   const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    if (!firebaseConfig.apiKey) {
       setConfigError("Your Firebase configuration is missing or incomplete. Please check your `.env` file and ensure all `NEXT_PUBLIC_FIREBASE_*` variables are set correctly.");
       setLoading(false);
       return;
@@ -34,7 +35,7 @@ export function FirebaseClientProvider({ children }: Props) {
     try {
       const instances = initializeFirebase();
       setFirebaseInstances(instances);
-    } catch (e: any) {
+    } catch (e: any)      {
       console.error(e);
       setConfigError(`An error occurred during Firebase initialization: ${e.message}`);
     }
@@ -60,7 +61,9 @@ export function FirebaseClientProvider({ children }: Props) {
       firestore={firestoreInstance as any}
       configError={configError}
     >
-      {children}
+      <UserProvider>
+        {children}
+      </UserProvider>
     </FirebaseProvider>
   );
 }

@@ -3,10 +3,11 @@
 import {usePathname, useRouter} from 'next/navigation';
 import {SidebarTrigger} from '@/components/ui/sidebar';
 import {Button} from '@/components/ui/button';
-import {useAuth} from '@/firebase';
+import {useAuth, useFirebaseConfigError} from '@/firebase';
 import {signOut} from 'firebase/auth';
 import {useToast} from '@/hooks/use-toast';
 import {LogOut} from 'lucide-react';
+import { useUser } from '@/firebase/auth/use-user';
 
 const pageTitles: {[key: string]: string} = {
   '/analysis': 'Threat Analysis',
@@ -19,8 +20,19 @@ export function Header() {
   const auth = useAuth();
   const router = useRouter();
   const {toast} = useToast();
+  const configError = useFirebaseConfigError();
+  const { clearMockUser } = useUser();
 
   const handleSignOut = async () => {
+    if (configError) {
+      clearMockUser();
+      toast({
+        title: 'Signed Out (Mock)',
+        description: 'You have been successfully signed out.',
+      });
+      router.push('/login');
+      return;
+    }
     try {
       await signOut(auth);
       toast({
