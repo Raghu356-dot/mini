@@ -15,7 +15,6 @@ import {Input} from '@/components/ui/input';
 import {useToast} from '@/hooks/use-toast';
 import {Loader2, Terminal} from 'lucide-react';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
-import { useUser } from '@/firebase/auth/use-user';
 
 const signupSchema = z.object({
   displayName: z.string().min(2, 'Display name must be at least 2 characters.'),
@@ -31,7 +30,6 @@ export function SignupForm() {
   const firestore = useFirestore();
   const configError = useFirebaseConfigError();
   const {toast} = useToast();
-  const { setMockUser } = useUser();
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -46,22 +44,9 @@ export function SignupForm() {
     setLoading(true);
     setError(null);
 
-    if (configError) {
-      // Mock signup when Firebase is not configured
-      setTimeout(() => {
-        setMockUser({
-            uid: 'mock-user-uid',
-            email: values.email,
-            displayName: values.displayName,
-            photoURL: `https://i.pravatar.cc/150?u=${values.email}`
-        });
-        toast({
-          title: 'Account Created (Mock)',
-          description: 'This is a simulated signup as Firebase is not configured.',
-        });
-        router.push('/analysis');
-        setLoading(false);
-      }, 1000);
+    if (configError || !auth || !firestore) {
+      setError(configError || "Firebase is not configured. Please check your environment variables.");
+      setLoading(false);
       return;
     }
 
@@ -94,68 +79,20 @@ export function SignupForm() {
         errorMessage = 'This email address is already in use by another account.';
       }
       setError(errorMessage);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (configError) {
      return (
-      <div className='space-y-4'>
         <Alert variant="destructive">
             <Terminal className="h-4 w-4" />
             <AlertTitle>Firebase Not Configured</AlertTitle>
             <AlertDescription>
-              <p>The app is in <span className='font-bold'>mock authentication mode</span>. A real account will not be created.</p>
+              <p>The app cannot connect to Firebase. Please ensure your environment variables are set correctly.</p>
               <p className='mt-2 text-xs'>{configError}</p>
             </AlertDescription>
         </Alert>
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="displayName"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>Display Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="name@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? <Loader2 className="animate-spin" /> : 'Create Account (Mock)'}
-                </Button>
-            </form>
-        </Form>
-      </div>
     )
   }
 
