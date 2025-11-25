@@ -3,7 +3,6 @@ import type {Metadata} from 'next';
 import './globals.css';
 import {Toaster} from '@/components/ui/toaster';
 import {cn} from '@/lib/utils';
-import {initializeFirebase} from '@/firebase';
 import {FirebaseClientProvider} from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
@@ -16,7 +15,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const {firebaseApp, auth, firestore} = initializeFirebase();
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
@@ -28,9 +26,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
-        <FirebaseClientProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
-          {children}
-        </FirebaseClientProvider>
+        <FirebaseClientProvider>{children}</FirebaseClientProvider>
         <Toaster />
       </body>
     </html>
