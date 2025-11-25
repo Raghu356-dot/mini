@@ -21,13 +21,14 @@ export function FirebaseClientProvider({ children }: Props) {
   const [firebaseInstances, setFirebaseInstances] = useState<FirebaseInstances | null>(null);
 
   useEffect(() => {
-    // This function will now only run on the client
+    // This function will now only run on the client, after the component mounts.
     const instances = initializeFirebase();
     setFirebaseInstances(instances);
-  }, []);
+  }, []); // The empty dependency array ensures this effect runs only once on the client.
 
   if (!firebaseInstances) {
-    // You can return a loader here if you want
+    // Render nothing or a loading indicator while Firebase is initializing.
+    // This prevents children from trying to access Firebase before it's ready.
     return null;
   }
 
