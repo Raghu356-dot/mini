@@ -8,8 +8,6 @@ import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { firebaseConfig } from './config';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
 
 type Props = {
   children: ReactNode;
@@ -27,8 +25,7 @@ export function FirebaseClientProvider({ children }: Props) {
   const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!firebaseConfig.apiKey) {
-      console.error("Firebase API Key is missing. Please check your .env file.");
+    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
       setConfigError("Your Firebase configuration is missing or incomplete. Please check your `.env` file and ensure all `NEXT_PUBLIC_FIREBASE_*` variables are set correctly.");
       setLoading(false);
       return;
@@ -52,35 +49,16 @@ export function FirebaseClientProvider({ children }: Props) {
     );
   }
 
-  if (configError) {
-    // Pass the error to the children so specific pages can display it
-    return (
-      <FirebaseProvider
-        firebaseApp={null as any}
-        auth={null as any}
-        firestore={null as any}
-        configError={configError}
-      >
-        {children}
-      </FirebaseProvider>
-    );
-  }
-
-
-  if (!firebaseInstances) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <p>Error initializing Firebase.</p>
-      </div>
-    );
-  }
+  const authInstance = firebaseInstances ? firebaseInstances.auth : null;
+  const firestoreInstance = firebaseInstances ? firebaseInstances.firestore : null;
+  const appInstance = firebaseInstances ? firebaseInstances.firebaseApp : null;
 
   return (
     <FirebaseProvider
-      firebaseApp={firebaseInstances.firebaseApp}
-      auth={firebaseInstances.auth}
-      firestore={firebaseInstances.firestore}
-      configError={null}
+      firebaseApp={appInstance as any}
+      auth={authInstance as any}
+      firestore={firestoreInstance as any}
+      configError={configError}
     >
       {children}
     </FirebaseProvider>
