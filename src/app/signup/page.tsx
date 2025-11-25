@@ -1,22 +1,22 @@
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {LoginForm} from './_components/login-form';
+import {SignupForm} from './_components/signup-form';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account.</CardDescription>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardDescription>Enter your information to create an account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          <SignupForm />
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/login" className="underline">
+              Log in
             </Link>
           </div>
         </CardContent>

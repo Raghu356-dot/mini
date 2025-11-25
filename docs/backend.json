@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -23,7 +24,14 @@
     }
   },
   "auth": {
-    "providers": ["anonymous"]
+    "providers": ["anonymous", "password"]
   },
-  "firestore": {}
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/backend/entities/UserProfile"
+      },
+      "description": "Stores public profile information for each user."
+    }
+  }
 }
