@@ -62,6 +62,7 @@ export function LoginForm() {
         errorMessage = 'Email/Password sign-in is not enabled for this Firebase project. Please go to the Firebase Console -> Authentication -> Sign-in method and enable it.';
       }
       setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
