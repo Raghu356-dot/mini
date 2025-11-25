@@ -7,8 +7,8 @@ import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
-import { firebaseConfig } from './config';
 import { UserProvider } from './auth/use-user';
+import { firebaseConfig } from './config';
 
 type Props = {
   children: ReactNode;
