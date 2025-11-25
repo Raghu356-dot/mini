@@ -77,6 +77,8 @@ export function SignupForm() {
       let errorMessage = 'An unexpected error occurred. Please try again.';
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = 'This email address is already in use by another account.';
+      } else if (err.code === 'auth/configuration-not-found') {
+        errorMessage = 'Email/Password sign-in is not enabled for this Firebase project. Please go to the Firebase Console -> Authentication -> Sign-in method and enable it.';
       }
       setError(errorMessage);
       setLoading(false);

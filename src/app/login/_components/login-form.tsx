@@ -58,6 +58,8 @@ export function LoginForm() {
       let errorMessage = 'An unexpected error occurred. Please try again.';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (err.code === 'auth/configuration-not-found') {
+        errorMessage = 'Email/Password sign-in is not enabled for this Firebase project. Please go to the Firebase Console -> Authentication -> Sign-in method and enable it.';
       }
       setError(errorMessage);
       setLoading(false);
