@@ -13,6 +13,7 @@ import {
   useFirebaseApp,
   useFirestore,
   useAuth,
+  useFirebaseConfigError,
 } from './provider';
 
 function initializeFirebase() {
@@ -21,6 +22,9 @@ function initializeFirebase() {
   let firestore: Firestore;
 
   if (!getApps().length) {
+    if (!firebaseConfig.apiKey) {
+      throw new Error("Firebase API Key is missing. Cannot initialize Firebase.");
+    }
     firebaseApp = initializeApp(firebaseConfig);
   } else {
     firebaseApp = getApp();
@@ -42,4 +46,5 @@ export {
   useFirebaseApp,
   useFirestore,
   useAuth,
+  useFirebaseConfigError,
 };

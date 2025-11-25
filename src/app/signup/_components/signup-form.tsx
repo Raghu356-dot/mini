@@ -8,12 +8,12 @@ import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {createUserWithEmailAndPassword, updateProfile} from 'firebase/auth';
 import {doc, setDoc} from 'firebase/firestore';
-import {useAuth, useFirestore} from '@/firebase';
+import {useAuth, useFirestore, useFirebaseConfigError} from '@/firebase';
 import {Button} from '@/components/ui/button';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {useToast} from '@/hooks/use-toast';
-import {Loader2} from 'lucide-react';
+import {Loader2, Terminal} from 'lucide-react';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 
 const signupSchema = z.object({
@@ -28,6 +28,7 @@ export function SignupForm() {
   const router = useRouter();
   const auth = useAuth();
   const firestore = useFirestore();
+  const configError = useFirebaseConfigError();
   const {toast} = useToast();
 
   const form = useForm<z.infer<typeof signupSchema>>({
@@ -40,6 +41,7 @@ export function SignupForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    if (configError) return;
     setLoading(true);
     setError(null);
     try {
@@ -74,6 +76,19 @@ export function SignupForm() {
     }
     setLoading(false);
   };
+
+  if (configError) {
+    return (
+      <Alert variant="destructive">
+        <Terminal className="h-4 w-4" />
+        <AlertTitle>Configuration Error</AlertTitle>
+        <AlertDescription>
+          {configError}
+          <p className='mt-2'>Please refer to the README for instructions on setting up your Firebase project.</p>
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   return (
     <Form {...form}>

@@ -7,6 +7,9 @@ import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { firebaseConfig } from './config';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 type Props = {
   children: ReactNode;
@@ -21,16 +24,27 @@ interface FirebaseInstances {
 export function FirebaseClientProvider({ children }: Props) {
   const [firebaseInstances, setFirebaseInstances] = useState<FirebaseInstances | null>(null);
   const [loading, setLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This function will now only run on the client, after the component mounts.
-    const instances = initializeFirebase();
-    setFirebaseInstances(instances);
+    if (!firebaseConfig.apiKey) {
+      console.error("Firebase API Key is missing. Please check your .env file.");
+      setConfigError("Your Firebase configuration is missing or incomplete. Please check your `.env` file and ensure all `NEXT_PUBLIC_FIREBASE_*` variables are set correctly.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const instances = initializeFirebase();
+      setFirebaseInstances(instances);
+    } catch (e: any) {
+      console.error(e);
+      setConfigError(`An error occurred during Firebase initialization: ${e.message}`);
+    }
     setLoading(false);
-  }, []); // The empty dependency array ensures this effect runs only once on the client.
+  }, []);
 
   if (loading) {
-    // Render a loading indicator while Firebase is initializing.
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -38,8 +52,22 @@ export function FirebaseClientProvider({ children }: Props) {
     );
   }
 
+  if (configError) {
+    // Pass the error to the children so specific pages can display it
+    return (
+      <FirebaseProvider
+        firebaseApp={null as any}
+        auth={null as any}
+        firestore={null as any}
+        configError={configError}
+      >
+        {children}
+      </FirebaseProvider>
+    );
+  }
+
+
   if (!firebaseInstances) {
-    // This case should ideally not be hit if initialization is successful
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <p>Error initializing Firebase.</p>
@@ -52,6 +80,7 @@ export function FirebaseClientProvider({ children }: Props) {
       firebaseApp={firebaseInstances.firebaseApp}
       auth={firebaseInstances.auth}
       firestore={firebaseInstances.firestore}
+      configError={null}
     >
       {children}
     </FirebaseProvider>
